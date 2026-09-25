@@ -2,6 +2,14 @@
 
 Anonymized example. People here are named Lisa, Max, Tom, and Paul.
 
+## What it looks like
+<img width="2560" height="1600" alt="grafik" src="https://github.com/user-attachments/assets/4d1b273a-4f48-43aa-bbcb-70b83b8a05cc" />
+<img width="2560" height="1600" alt="grafik" src="https://github.com/user-attachments/assets/8ae65ef9-aa23-4385-9ad5-774d3eb8d959" />
+<img width="2560" height="1600" alt="grafik" src="https://github.com/user-attachments/assets/9130fa00-c0f2-4ad4-95f7-7d6fc13ae0f6" />
+
+
+
+
 ## What it can do
 
 - **Overview:** Five "Appointments today" cards (three on top, two below), followed by weather, waste collection, and household chores side by side.
