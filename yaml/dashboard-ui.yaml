@@ -1,0 +1,1558 @@
+version: 1
+
+# =====================================================================
+# Familien-Dashboard - Oberflaeche (Main UI)
+# Ablage: $OPENHAB_CONF/yaml/familien-dashboard-ui.yaml
+# Aufruf: /page/familie_dashboard
+#
+# Bestandteile:
+# Personenfarben: Lisa #3a9d5d (Grün), Max #009999 (Petrol), Tom #2f5ea8
+#   (Dunkelblau), Paul #c9a23f (Gold), Familie #8a5cc8 (Lila)
+#
+#   1. widgets: termine_heute_karte  (wiederverwendbare Karte "Termine heute")
+#               kalender_woche       (Wochen-Grid Mo-So x Stunden)
+#               haushaltsaufgaben_karte (Aufgabenliste, Uebersicht)
+#               aufgabe_bearbeiten   (Popup: anlegen/bearbeiten/loeschen)
+#               muellabfuhr_karte    (naechste Abholtermine)
+#               wetter_karte         (aktuell, Tipp, 4-Tage-Vorschau)
+#   2. pages:   familie_dashboard    (TabbedPage mit 6 Tabs)
+#               familie_uebersicht   (Tab 1: 3+2 Kalenderkarten, darunter Aufgaben)
+#               familie_familie / _lisa / _max / _tom / _paul (Wochenansicht Kalender-Grid)
+#
+# Zeitabhaengigkeit: Ausdruecke werden nur neu berechnet, wenn sich ein
+#   referenziertes Item aendert - nicht von selbst mit der Uhrzeit. Deshalb
+#   haengen alle zeitabhaengigen Ausdruecke zusaetzlich an "clockItem"
+#   (Dashboard_Uhr, jede Minute aktualisiert). Damit springen "heute",
+#   vergangene Termine und der Wochenwechsel rechtzeitig um.
+#
+# WICHTIG zu den Ausdruecken (=...):
+#   Main UI kann nur EINZELNE Ausdruecke auswerten - keine Anweisungen wie
+#   "const", "return" oder { ... }-Bloecke. Solche Ausdruecke schlagen still
+#   fehl und liefern einen "wahren" Wert -> UNDEF-Termine wurden angezeigt.
+#   Deshalb hier alles als reine Ausdruecke (Pfeilfunktion ohne Block).
+# =====================================================================
+
+widgets:
+  termine_heute_karte:
+    component: oh-context
+    config:
+      functions:
+        # Alle heutigen, noch nicht beendeten Termine ALLER Praefixe,
+        # chronologisch sortiert. Rueckgabe: Liste von Item-Basisnamen,
+        # z. B. ["Termine_Max_0", "Termine_MaxArbeit_2"].
+        termine: >-
+          =() => (props.prefix || '').split(',').map(x => x.trim()).filter(x => x)
+            .reduce((acc, pre) => acc.concat([0, 1, 2, 3, 4, 5].map(n => pre + '_' + n)), [])
+            .filter(k => !['NULL', 'UNDEF', '-', ''].includes(items[k + '_Titel'].state)
+              && dayjs(items[k + '_Ende'].state).isAfter(dayjs())
+              && dayjs(items[k + '_Beginn'].state).isBefore(dayjs().endOf('day')))
+            .sort((a, b) => dayjs(items[a + '_Beginn'].state).valueOf() - dayjs(items[b + '_Beginn'].state).valueOf())
+    slots:
+      default:
+        - component: f7-card
+          config:
+            style:
+              margin: 0
+              flex: 1 1 auto
+              box-sizing: border-box
+              border-radius: 16px
+              overflow: hidden
+              border: 1px solid rgba(128, 128, 128, 0.22)
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06)
+              padding: 18px 20px 12px
+          slots:
+            default:
+              # --- Kopf: farbiger Kreis mit Initiale, Name, Untertitel ---------
+              - component: div
+                config:
+                  style:
+                    display: flex
+                    align-items: center
+                    gap: 14px
+                    padding-bottom: 14px
+                    border-bottom: 1px solid rgba(128, 128, 128, 0.18)
+                slots:
+                  default:
+                    - component: Label
+                      config:
+                        text: "=(props.title || '?').charAt(0).toUpperCase()"
+                        style:
+                          width: 42px
+                          height: 42px
+                          flex: 0 0 42px
+                          border-radius: 50%
+                          display: flex
+                          align-items: center
+                          justify-content: center
+                          font-size: 17px
+                          font-weight: 500
+                          color: "=props.color || '#8e8e93'"
+                          background: "='color-mix(in srgb, ' + (props.color || '#8e8e93') + ' 18%, transparent)'"
+                    - component: div
+                      slots:
+                        default:
+                          - component: Label
+                            config:
+                              text: =props.title
+                              style:
+                                font-size: 19px
+                                font-weight: 500
+                                letter-spacing: -0.01em
+                                line-height: 1.2
+                          - component: Label
+                            config:
+                              visible: =!!props.subtitle
+                              text: =props.subtitle
+                              style:
+                                font-size: 12px
+                                opacity: 0.55
+                                margin-top: 2px
+              - component: div
+                config:
+                  style:
+                    padding-top: 6px
+                slots:
+                  default:
+                    # --- Platzhalter: Kalender noch nicht angebunden ---------------
+                    - component: Label
+                      config:
+                        visible: =!props.prefix
+                        text: Kalender noch nicht eingerichtet
+                        style:
+                          font-size: 15px
+                          opacity: 0.55
+                          padding: 8px 0
+
+                    # --- Kalender angebunden, aber keine (weiteren) Termine heute ---
+                    - component: Label
+                      config:
+                        text: Keine Termine mehr heute
+                        style:
+                          font-size: 15px
+                          opacity: 0.55
+                          padding: 8px 0
+                        visible: >-
+                          =((tick) => !!props.prefix && fn.termine().length === 0)(props.clockItem ? items[props.clockItem].state : '')
+
+                    # --- Terminliste: Titel + Uhrzeit, ohne Symbole -----------------
+                    # Nur Slots mit gueltigem, noch nicht beendetem Termin von heute.
+                    - component: oh-repeater
+                      config:
+                        sourceType: array
+                        for: k
+                        fragment: true
+                        in: >-
+                          =((tick) => fn.termine())(props.clockItem ? items[props.clockItem].state : '')
+                      slots:
+                        default:
+                          - component: div
+                            config:
+                              style:
+                                padding: 8px 0
+                            slots:
+                              default:
+                                - component: Label
+                                  config:
+                                    text: =items[loop.k + '_Titel'].state
+                                    style:
+                                      font-size: 15px
+                                      font-weight: 500
+                                      letter-spacing: -0.01em
+                                      line-height: 1.3
+                                - component: Label
+                                  config:
+                                    text: >-
+                                      =(dayjs(items[loop.k + '_Beginn'].state).format('HH:mm') === '00:00'
+                                        && dayjs(items[loop.k + '_Ende'].state).diff(dayjs(items[loop.k + '_Beginn'].state), 'hour') >= 24)
+                                        ? 'ganztägig'
+                                        : (dayjs(items[loop.k + '_Beginn'].state).isBefore(dayjs())
+                                          ? 'läuft · bis ' + dayjs(items[loop.k + '_Ende'].state).format('HH:mm')
+                                          : dayjs(items[loop.k + '_Beginn'].state).format('HH:mm')
+                                            + ' – ' + dayjs(items[loop.k + '_Ende'].state).format('HH:mm'))
+                                    style:
+                                      font-size: 13px
+                                      opacity: 0.55
+                                      margin-top: 2px
+    props:
+      parameters:
+        - name: title
+          label: Titel
+          type: TEXT
+          required: false
+          description: Name der Person bzw. des Kalenders
+        - name: subtitle
+          label: Untertitel
+          type: TEXT
+          required: false
+          description: z. B. Erwachsene, 3. Klasse
+        - name: prefix
+          label: Item-Präfix
+          type: TEXT
+          required: false
+          description: Präfix(e) der Termin-Items, mehrere per Komma, z. B. Termine_Max,Termine_MaxArbeit (leer = Platzhalter)
+        - name: color
+          label: Akzentfarbe
+          type: TEXT
+          required: false
+          description: CSS-Farbe, z. B. #009999
+        - name: clockItem
+          label: Uhr-Item
+          type: TEXT
+          context: item
+          required: false
+          description: DateTime-Item, das sich jede Minute aendert (erzwingt Neuberechnung)
+
+  # -------------------------------------------------------------------
+  # Wochenansicht als klassisches Kalender-Grid (heute + 6 Tage x Stunden)
+  # Datenmodell wird einmal in fn.week() berechnet (oh-context).
+  # Item-Schema: <prefix>_<n>_Titel / _Beginn / _Ende, n = 0 .. slots-1
+  # -------------------------------------------------------------------
+  kalender_woche:
+    component: oh-context
+    config:
+      functions:
+        # Liefert 7 Tagesobjekte (heute + die naechsten 6 Tage, heute ganz links):
+        #   { d, ds, today, allday: [...], timed: [{t, b, e, i, top, h, show, past}] }
+        # b/e in Millisekunden, top/h in Pixel, i = Einrueckstufe bei Ueberschneidung
+        week: >-
+          =() => ((N, P, H0, H1, HH, mon, now, tick) =>
+            ((evs) => [0, 1, 2, 3, 4, 5, 6].map(d =>
+              ((ds, de, r0) => ({
+                d: d,
+                ds: ds,
+                today: dayjs(ds).isSame(now, 'day'),
+                allday: evs.filter(x => x.a && x.b < de && x.e > ds),
+                timed: evs.filter(x => !x.a && x.b < de && x.e > ds).map((x, i, arr) =>
+                  ((s, en) => ({
+                    t: x.t,
+                    b: x.b,
+                    e: x.e,
+                    past: x.e < now.valueOf(),
+                    i: Math.min(3, arr.filter(y => y.b < x.e && y.e > x.b && (y.b < x.b || (y.b === x.b && y.n < x.n))).length),
+                    top: Math.max(0, s) * HH,
+                    h: Math.max((Math.min(H1 - H0, en) - Math.max(0, s)) * HH, 20),
+                    show: en > 0 && s < H1 - H0
+                  }))((x.b - r0) / 3600000, (x.e - r0) / 3600000))
+              }))(mon.add(d, 'day').valueOf(), mon.add(d + 1, 'day').valueOf(), mon.add(d, 'day').hour(H0).valueOf())
+            ))(P.reduce((acc, pre) => acc.concat(' '.repeat(N).split('').map((c, n) => ({
+                n: acc.length + n,
+                t: items[pre + '_' + n + '_Titel'].state,
+                b: dayjs(items[pre + '_' + n + '_Beginn'].state).valueOf(),
+                e: dayjs(items[pre + '_' + n + '_Ende'].state).valueOf()
+              }))), []).filter(x => !['NULL', 'UNDEF', '-', ''].includes(x.t) && x.b > 0 && x.e >= x.b)
+              .map(x => ({
+                n: x.n, t: x.t, b: x.b, e: x.e,
+                a: x.e > x.b && dayjs(x.b).isSame(dayjs(x.b).startOf('day')) && dayjs(x.e).isSame(dayjs(x.e).startOf('day'))
+              })))
+          )(Number(props.slots || 30), (props.prefix || '').split(',').map(x => x.trim()).filter(x => x), Number(props.startHour || 0), Number(props.endHour || 24),
+            Number(props.hourHeight || 24), dayjs().startOf('day'), dayjs(),
+            props.clockItem ? items[props.clockItem].state : '')
+    slots:
+      default:
+        - component: f7-card
+          config:
+            style:
+              margin: 0
+              border-radius: 16px
+              overflow: hidden
+              border: 1px solid rgba(128, 128, 128, 0.22)
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06)
+          slots:
+            default:
+              - component: div
+                config:
+                  style:
+                    display: grid
+                    grid-template-columns: 52px repeat(7, minmax(0, 1fr))
+                    padding: 10px 12px 12px 0
+                slots:
+                  default:
+                    # ================= Kopfzeile =================
+                    - component: Label
+                      config:
+                        text: >-
+                          =((kw, tick) => ((a, b) => 'KW ' + a + (a === b ? '' : '/' + b))(kw(dayjs().startOf('day')), kw(dayjs().startOf('day').add(6, 'day'))))((d) => ((thu) => Math.floor(thu.diff(thu.startOf('year'), 'day') / 7) + 1)(d.subtract((d.day() + 6) % 7, 'day').add(3, 'day')), props.clockItem ? items[props.clockItem].state : '')
+                        style:
+                          font-size: 12px
+                          opacity: 0.6
+                          text-align: center
+                          align-self: center
+                    - component: oh-repeater
+                      config:
+                        sourceType: array
+                        for: day
+                        fragment: true
+                        in: =fn.week()
+                      slots:
+                        default:
+                          - component: Label
+                            config:
+                              text: >-
+                                =(loop.day.today ? 'Heute' : ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][dayjs(loop.day.ds).day()]) + ' ' + dayjs(loop.day.ds).format('D.M.')
+                              style:
+                                text-align: center
+                                font-size: 15px
+                                font-weight: 500
+                                padding: 6px 0
+                                margin: 0 3px 6px
+                                border-radius: 10px
+                                background: "=loop.day.today ? (props.color || '#8e8e93') : 'transparent'"
+                                color: "=loop.day.today ? '#fff' : 'inherit'"
+
+                    # ================= Ganztaegig-Zeile =================
+                    - component: Label
+                      config:
+                        text: ganztg.
+                        style:
+                          font-size: 11px
+                          opacity: 0.6
+                          text-align: right
+                          padding: 5px 6px 0 0
+                    - component: oh-repeater
+                      config:
+                        sourceType: array
+                        for: day
+                        fragment: true
+                        in: =fn.week()
+                      slots:
+                        default:
+                          - component: div
+                            config:
+                              style:
+                                min-height: 26px
+                                padding: 2px
+                                display: flex
+                                flex-direction: column
+                                gap: 2px
+                                border-left: 1px solid rgba(128, 128, 128, 0.25)
+                                border-bottom: 1px solid rgba(128, 128, 128, 0.25)
+                            slots:
+                              default:
+                                - component: oh-repeater
+                                  config:
+                                    sourceType: array
+                                    for: ev
+                                    fragment: true
+                                    in: =loop.day.allday
+                                  slots:
+                                    default:
+                                      - component: Label
+                                        config:
+                                          text: =loop.ev.t
+                                          style:
+                                            font-size: 12px
+                                            font-weight: 500
+                                            color: "#fff"
+                                            background: "=props.color || '#8e8e93'"
+                                            border-radius: 6px
+                                            padding: 2px 6px
+                                            white-space: nowrap
+                                            overflow: hidden
+                                            text-overflow: ellipsis
+
+                    # ================= Zeitachse =================
+                    - component: div
+                      config:
+                        style:
+                          position: relative
+                          height: >-
+                            =((Number(props.endHour || 24) - Number(props.startHour || 0)) * Number(props.hourHeight || 24)) + 'px'
+                      slots:
+                        default:
+                          - component: oh-repeater
+                            config:
+                              sourceType: array
+                              for: h
+                              fragment: true
+                              in: >-
+                                =' '.repeat(Number(props.endHour || 24) - Number(props.startHour || 0)).split('').map((c, i) => Number(props.startHour || 0) + i).filter(h => Number(props.hourHeight || 24) >= 30 || h % 2 === 0)
+                            slots:
+                              default:
+                                - component: Label
+                                  config:
+                                    text: "=(loop.h < 10 ? '0' : '') + loop.h + ':00'"
+                                    style:
+                                      position: absolute
+                                      right: 6px
+                                      top: >-
+                                        =Math.max(0, (loop.h - Number(props.startHour || 0)) * Number(props.hourHeight || 24) - 7) + 'px'
+                                      font-size: 11px
+                                      opacity: 0.6
+
+                    # ================= Tagesspalten =================
+                    - component: oh-repeater
+                      config:
+                        sourceType: array
+                        for: day
+                        fragment: true
+                        in: =fn.week()
+                      slots:
+                        default:
+                          - component: div
+                            config:
+                              style:
+                                position: relative
+                                height: >-
+                                  =((Number(props.endHour || 24) - Number(props.startHour || 0)) * Number(props.hourHeight || 24)) + 'px'
+                                border-left: 1px solid rgba(128, 128, 128, 0.25)
+                                background-color: "=loop.day.today ? 'rgba(128, 128, 128, 0.07)' : 'transparent'"
+                                background-image: >-
+                                  ='repeating-linear-gradient(to bottom, rgba(128,128,128,0.22) 0, rgba(128,128,128,0.22) 1px, transparent 1px, transparent ' + Number(props.hourHeight || 24) + 'px)'
+                            slots:
+                              default:
+                                - component: oh-repeater
+                                  config:
+                                    sourceType: array
+                                    for: ev
+                                    fragment: true
+                                    in: =loop.day.timed
+                                  slots:
+                                    default:
+                                      - component: div
+                                        config:
+                                          visible: =loop.ev.show
+                                          style:
+                                            position: absolute
+                                            top: "=(loop.ev.top + 1) + 'px'"
+                                            height: "=(loop.ev.h - 2) + 'px'"
+                                            left: "='calc(' + (loop.ev.i * 14) + '% + 2px)'"
+                                            right: 2px
+                                            z-index: =loop.ev.i + 1
+                                            box-sizing: border-box
+                                            overflow: hidden
+                                            padding: 2px 5px
+                                            border-radius: 6px
+                                            border-left: "='4px solid ' + (props.color || '#8e8e93')"
+                                            background: >-
+                                              ='color-mix(in srgb, ' + (props.color || '#8e8e93') + ' 22%, var(--f7-card-bg-color, #fff))'
+                                            box-shadow: 0 0 0 1px var(--f7-card-bg-color, #fff)
+                                            opacity: "=loop.ev.past ? 0.45 : 1"
+                                        slots:
+                                          default:
+                                            - component: Label
+                                              config:
+                                                text: =loop.ev.t
+                                                style:
+                                                  font-size: 12px
+                                                  font-weight: 500
+                                                  line-height: 1.2
+                                                  word-break: break-word
+                                            - component: Label
+                                              config:
+                                                visible: =loop.ev.h >= 38
+                                                text: >-
+                                                  =dayjs(loop.ev.b).format('HH:mm') + ' – ' + dayjs(loop.ev.e).format('HH:mm')
+                                                style:
+                                                  font-size: 11px
+                                                  opacity: 0.75
+    props:
+      parameters:
+        - name: prefix
+          label: Item-Präfix
+          type: TEXT
+          required: false
+          description: Präfix(e) der Wochen-Items, mehrere per Komma, z. B. Woche_Max,Woche_MaxArbeit
+        - name: slots
+          label: Anzahl Slots
+          type: INTEGER
+          required: false
+          description: Muss zu maxEvents des Eventfilters passen (Standard 30)
+        - name: color
+          label: Akzentfarbe
+          type: TEXT
+          required: false
+        - name: startHour
+          label: Erste Stunde
+          type: INTEGER
+          required: false
+          description: Standard 0
+        - name: endHour
+          label: Letzte Stunde (exklusiv)
+          type: INTEGER
+          required: false
+          description: Standard 24
+        - name: hourHeight
+          label: Pixel pro Stunde
+          type: INTEGER
+          required: false
+          description: Standard 24
+        - name: clockItem
+          label: Uhr-Item
+          type: TEXT
+          context: item
+          required: false
+          description: DateTime-Item, das sich jede Minute aendert (erzwingt Neuberechnung)
+
+  # -------------------------------------------------------------------
+  # Haushaltsaufgaben - Karte fuer die Uebersicht
+  # Liste der Aufgaben kommt aus AufgabenManager_Liste (JSON [{id, label}],
+  # von der Regel gepflegt). Alle Zustaende werden live aus den Items
+  # <id>_TageBis / _Faellig / _Intervall / _Aktiv gelesen.
+  # -------------------------------------------------------------------
+  haushaltsaufgaben_karte:
+    component: oh-context
+    config:
+      functions:
+        # Sortierung: aktive vor pausierten, faellige zuerst, dann nach Resttagen
+        list: >-
+          =() => ((raw) => (['NULL', 'UNDEF', '-', ''].includes(raw) ? [] : JSON.parse(raw))
+            .map(a => ({
+              id: a.id,
+              label: a.label,
+              t: Number(items[a.id + '_TageBis'].state) || 0,
+              iv: Number(items[a.id + '_Intervall'].state) || 0,
+              f: items[a.id + '_Faellig'].state === 'ON',
+              aktiv: items[a.id + '_Aktiv'].state !== 'OFF'
+            }))
+            .sort((x, y) => (y.aktiv - x.aktiv) || (y.f - x.f) || (x.t - y.t) || x.label.localeCompare(y.label))
+          )(items[props.listItem || 'AufgabenManager_Liste'].state)
+    slots:
+      default:
+        - component: f7-card
+          config:
+            style:
+              margin: 0
+              flex: 1 1 auto
+              min-width: 0
+              border-radius: 16px
+              overflow: hidden
+              border: 1px solid rgba(128, 128, 128, 0.22)
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06)
+              box-sizing: border-box
+              padding: 18px 20px 10px
+          slots:
+            default:
+              # ---------------- Kopf: Titel, Umschalter, "Neu" ----------------
+              - component: div
+                config:
+                  style:
+                    display: flex
+                    align-items: center
+                    gap: 10px
+                    margin-bottom: 12px
+                slots:
+                  default:
+                    - component: Label
+                      config:
+                        text: =(props.title || 'Haushaltsaufgaben').toUpperCase()
+                        style:
+                          font-size: 12px
+                          font-weight: 600
+                          letter-spacing: 0.08em
+                          opacity: 0.55
+                          flex: 1
+                    # Umschalter: nur faellige <-> alle (zum Bearbeiten/Loeschen)
+                    - component: oh-link
+                      config:
+                        visible: =fn.list().length > 0
+                        text: "=vars.aufgabenAlle ? 'Nur fällige' : 'Alle (' + fn.list().length + ')'"
+                        style:
+                          font-size: 13px
+                        action: variable
+                        actionVariable: aufgabenAlle
+                        actionVariableValue: =!vars.aufgabenAlle
+                    - component: oh-button
+                      config:
+                        text: Neu
+                        iconF7: plus
+                        iconSize: 16
+                        small: true
+                        fill: true
+                        round: true
+                        style:
+                          background: "=props.color || '#6d7a8a'"
+                        action: popup
+                        actionModal: widget:aufgabe_bearbeiten
+                        actionModalConfig:
+                          color: "=props.color || '#6d7a8a'"
+                          befehlItem: "=props.befehlItem || 'AufgabenManager_Befehl'"
+
+              # ---------------- Leerzustaende ----------------
+              - component: Label
+                config:
+                  visible: =fn.list().length === 0
+                  text: Noch keine Aufgaben – über „Neu“ anlegen.
+                  style:
+                    opacity: 0.6
+                    padding: 6px 0
+              - component: Label
+                config:
+                  visible: =fn.list().length > 0 && !vars.aufgabenAlle && fn.list().filter(a => a.f && a.aktiv).length === 0
+                  text: 🎉 Nichts fällig – alles erledigt!
+                  style:
+                    opacity: 0.6
+                    padding: 6px 0
+
+              # ---------------- Liste ----------------
+              - component: div
+                config:
+                  style:
+                    display: flex
+                    flex-direction: column
+                slots:
+                  default:
+                    - component: oh-repeater
+                      config:
+                        sourceType: array
+                        for: a
+                        fragment: true
+                        in: =fn.list().filter(a => vars.aufgabenAlle || (a.f && a.aktiv))
+                      slots:
+                        default:
+                          - component: div
+                            config:
+                              style:
+                                display: flex
+                                align-items: center
+                                gap: 8px
+                                padding: 8px 0
+                                border-top: "=loop.a_idx > 0 ? '1px solid rgba(128, 128, 128, 0.18)' : 'none'"
+                                opacity: "=loop.a.aktiv ? 1 : 0.5"
+                            slots:
+                              default:
+                                # Antippen -> Bearbeiten-Popup
+                                - component: oh-link
+                                  config:
+                                    style:
+                                      flex: 1
+                                      min-width: 0
+                                      display: block
+                                      color: inherit
+                                    action: popup
+                                    actionModal: widget:aufgabe_bearbeiten
+                                    actionModalConfig:
+                                      id: =loop.a.id
+                                      label: =loop.a.label
+                                      color: "=props.color || '#6d7a8a'"
+                                      befehlItem: "=props.befehlItem || 'AufgabenManager_Befehl'"
+                                  slots:
+                                    default:
+                                      - component: Label
+                                        config:
+                                          text: =loop.a.label
+                                          style:
+                                            font-size: 16px
+                                            font-weight: 500
+                                            white-space: nowrap
+                                            overflow: hidden
+                                            text-overflow: ellipsis
+                                      - component: Label
+                                        config:
+                                          text: >-
+                                            =(!loop.a.aktiv ? 'pausiert'
+                                              : loop.a.f ? 'fällig'
+                                              : loop.a.t <= 1 ? 'morgen fällig'
+                                              : 'in ' + loop.a.t + ' Tagen')
+                                            + ' · ' + (loop.a.iv === 1 ? 'täglich' : loop.a.iv === 7 ? 'wöchentlich' : 'alle ' + loop.a.iv + ' Tage')
+                                          style:
+                                            font-size: 13px
+                                            margin-top: 2px
+                                            opacity: 0.6
+                                # Abhaken -> OFF an <id>_Faellig (loest Regel "erledigt" aus)
+                                - component: oh-link
+                                  config:
+                                    iconF7: checkmark_circle
+                                    iconSize: 30
+                                    iconColor: gray
+                                    action: command
+                                    actionItem: =loop.a.id + '_Faellig'
+                                    actionCommand: "OFF"
+    props:
+      parameters:
+        - name: title
+          label: Titel
+          type: TEXT
+          required: false
+        - name: color
+          label: Akzentfarbe
+          type: TEXT
+          required: false
+        - name: listItem
+          label: Listen-Item
+          type: TEXT
+          context: item
+          required: false
+          description: String-Item mit JSON-Liste der Aufgaben (Standard AufgabenManager_Liste)
+        - name: befehlItem
+          label: Befehls-Item
+          type: TEXT
+          context: item
+          required: false
+          description: String-Item fuer CRUD-Befehle (Standard AufgabenManager_Befehl)
+
+  # -------------------------------------------------------------------
+  # Popup: Aufgabe anlegen (ohne id) bzw. bearbeiten/loeschen (mit id)
+  # -------------------------------------------------------------------
+  aufgabe_bearbeiten:
+    component: f7-block
+    config:
+      style:
+        margin: 0
+        padding: 20px
+        display: flex
+        flex-direction: column
+        gap: 14px
+    slots:
+      default:
+        - component: Label
+          config:
+            text: "=props.id ? 'Aufgabe bearbeiten' : 'Neue Aufgabe'"
+            style:
+              font-size: 24px
+              font-weight: 600
+              padding-bottom: 6px
+              border-bottom: "='4px solid ' + (props.color || '#6d7a8a')"
+
+        # ---------------- Name ----------------
+        - component: Label
+          config:
+            text: Name
+            style:
+              font-size: 14px
+              opacity: 0.7
+        - component: oh-input
+          config:
+            type: text
+            variable: aufgabeLabel
+            defaultValue: "=props.label || ''"
+            placeholder: z. B. Bad putzen
+            outline: true
+            clearButton: true
+
+        # ---------------- Intervall ----------------
+        - component: Label
+          config:
+            text: Wiederholen alle … Tage
+            style:
+              font-size: 14px
+              opacity: 0.7
+        - component: oh-input
+          config:
+            type: number
+            inputmode: numeric
+            min: 1
+            variable: aufgabeIntervall
+            defaultValue: "=props.id ? items[props.id + '_Intervall'].state : 7"
+            outline: true
+
+        # ---------------- Naechste Faelligkeit (nur bearbeiten) --------
+        - component: Label
+          config:
+            visible: =!!props.id
+            text: Nächste Fälligkeit
+            style:
+              font-size: 14px
+              opacity: 0.7
+        - component: oh-input
+          config:
+            visible: =!!props.id
+            type: date
+            variable: aufgabeFaellig
+            defaultValue: >-
+              =props.id ? dayjs().add(items[props.id + '_Faellig'].state === 'ON' ? 0 : (Number(items[props.id + '_TageBis'].state) || 0), 'day').format('YYYY-MM-DD') : ''
+            outline: true
+
+        # ---------------- Aktiv / pausiert (nur bearbeiten) -----------
+        - component: div
+          config:
+            visible: =!!props.id
+            style:
+              display: flex
+              align-items: center
+              justify-content: space-between
+          slots:
+            default:
+              - component: Label
+                config:
+                  text: Aktiv
+                  style:
+                    font-size: 16px
+              - component: oh-toggle
+                config:
+                  item: =props.id + '_Aktiv'
+
+        # ---------------- Speichern / Abbrechen ----------------
+        - component: div
+          config:
+            style:
+              display: flex
+              gap: 10px
+              margin-top: 8px
+          slots:
+            default:
+              - component: oh-button
+                config:
+                  text: Abbrechen
+                  outline: true
+                  large: true
+                  popupClose: true
+                  style:
+                    flex: 1
+              - component: oh-button
+                config:
+                  text: Speichern
+                  fill: true
+                  large: true
+                  popupClose: true
+                  disabled: >-
+                    =!(vars.aufgabeLabel !== undefined ? vars.aufgabeLabel : props.label)
+                  style:
+                    flex: 1
+                    background: "=props.color || '#6d7a8a'"
+                  action: command
+                  actionItem: "=props.befehlItem || 'AufgabenManager_Befehl'"
+                  actionCommand: >-
+                    =JSON.stringify(props.id
+                      ? {
+                          cmd: 'update',
+                          name: props.id,
+                          label: (vars.aufgabeLabel !== undefined ? vars.aufgabeLabel : props.label).trim(),
+                          intervall: Math.max(1, Number(vars.aufgabeIntervall !== undefined ? vars.aufgabeIntervall : items[props.id + '_Intervall'].state) || 1),
+                          tagebis: vars.aufgabeFaellig ? dayjs(vars.aufgabeFaellig).startOf('day').diff(dayjs().startOf('day'), 'day') : undefined
+                        }
+                      : {
+                          cmd: 'create',
+                          label: (vars.aufgabeLabel || '').trim(),
+                          intervall: Math.max(1, Number(vars.aufgabeIntervall || 7) || 7)
+                        })
+
+        # ---------------- Loeschen mit Rueckfrage (nur bearbeiten) ------
+        - component: oh-button
+          config:
+            visible: =!!props.id && !vars.aufgabeLoeschen
+            text: Aufgabe löschen
+            color: red
+            iconF7: trash
+            action: variable
+            actionVariable: aufgabeLoeschen
+            actionVariableValue: true
+        - component: div
+          config:
+            visible: =!!props.id && !!vars.aufgabeLoeschen
+            style:
+              display: flex
+              gap: 10px
+          slots:
+            default:
+              - component: oh-button
+                config:
+                  text: Nein
+                  outline: true
+                  style:
+                    flex: 1
+                  action: variable
+                  actionVariable: aufgabeLoeschen
+                  actionVariableValue: false
+              - component: oh-button
+                config:
+                  text: Wirklich löschen
+                  fill: true
+                  color: red
+                  popupClose: true
+                  style:
+                    flex: 1
+                  action: command
+                  actionItem: "=props.befehlItem || 'AufgabenManager_Befehl'"
+                  actionCommand: "=JSON.stringify({ cmd: 'delete', name: props.id })"
+    props:
+      parameters:
+        - name: id
+          label: Aufgaben-ID
+          type: TEXT
+          required: false
+          description: Name der Aufgaben-Gruppe (leer = neue Aufgabe)
+        - name: label
+          label: Name
+          type: TEXT
+          required: false
+        - name: color
+          label: Akzentfarbe
+          type: TEXT
+          required: false
+        - name: befehlItem
+          label: Befehls-Item
+          type: TEXT
+          context: item
+          required: false
+
+  # -------------------------------------------------------------------
+  # Muellabfuhr - naechste Abholtermine, nach Datum sortiert
+  # Tonnen/Items sind unten in fn.bins fest hinterlegt.
+  # Badge: heute (rot), morgen (orange), bis 7 Tage (gruen), sonst Datum (grau)
+  # -------------------------------------------------------------------
+  muellabfuhr_karte:
+    component: oh-context
+    config:
+      functions:
+        bins: >-
+          =() => ((tick, today) => [
+              { item: 'garbage_collection_blackbin',  label: 'Restmüll',    icon: '🗑️' },
+              { item: 'garbage_collection_greenbin',  label: 'Biotonne',    icon: '🌿' },
+              { item: 'garbage_collection_yellowbin', label: 'Gelber Sack', icon: '♻️' },
+              { item: 'garbage_collection_bluebin',   label: 'Altpapier',   icon: '📦' }
+            ].map(b => ((st) => ({
+              label: b.label,
+              icon: b.icon,
+              date: st,
+              d: dayjs(st).isValid() ? dayjs(st).startOf('day').diff(today, 'day') : 9999
+            }))(items[b.item].state))
+            .sort((x, y) => x.d - y.d)
+          )(props.clockItem ? items[props.clockItem].state : '', dayjs().startOf('day'))
+    slots:
+      default:
+        - component: f7-card
+          config:
+            style:
+              margin: 0
+              flex: 1 1 auto
+              box-sizing: border-box
+              border-radius: 16px
+              overflow: hidden
+              border: 1px solid rgba(128, 128, 128, 0.22)
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06)
+              padding: 18px 20px 8px
+          slots:
+            default:
+              - component: Label
+                config:
+                  text: =(props.title || 'Müllabfuhr').toUpperCase()
+                  style:
+                    font-size: 12px
+                    font-weight: 600
+                    letter-spacing: 0.08em
+                    opacity: 0.55
+                    margin-bottom: 10px
+              - component: oh-repeater
+                config:
+                  sourceType: array
+                  for: b
+                  fragment: true
+                  in: =fn.bins()
+                slots:
+                  default:
+                    - component: div
+                      config:
+                        style:
+                          display: flex
+                          align-items: center
+                          gap: 14px
+                          padding: 11px 0
+                          border-top: "=loop.b_idx > 0 ? '1px solid rgba(128, 128, 128, 0.18)' : 'none'"
+                      slots:
+                        default:
+                          - component: Label
+                            config:
+                              text: =loop.b.icon
+                              style:
+                                font-size: 26px
+                                width: 32px
+                                text-align: center
+                          - component: div
+                            config:
+                              style:
+                                flex: 1
+                                min-width: 0
+                            slots:
+                              default:
+                                - component: Label
+                                  config:
+                                    text: =loop.b.label
+                                    style:
+                                      font-size: 16px
+                                      font-weight: 500
+                                - component: Label
+                                  config:
+                                    text: >-
+                                      =loop.b.d === 9999 ? 'kein Termin'
+                                        : ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][dayjs(loop.b.date).day()] + ', '
+                                          + dayjs(loop.b.date).date() + '. '
+                                          + ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][dayjs(loop.b.date).month()]
+                                    style:
+                                      font-size: 13px
+                                      opacity: 0.55
+                                      margin-top: 2px
+                          - component: Label
+                            config:
+                              visible: =loop.b.d !== 9999
+                              text: >-
+                                =loop.b.d <= 0 ? 'heute'
+                                  : loop.b.d === 1 ? 'morgen'
+                                  : loop.b.d <= 7 ? 'in ' + loop.b.d + ' Tagen'
+                                  : dayjs(loop.b.date).format('D.M.')
+                              style:
+                                font-size: 12px
+                                font-weight: 500
+                                padding: 4px 10px
+                                border-radius: 12px
+                                white-space: nowrap
+                                color: >-
+                                  =loop.b.d <= 0 ? '#e5484d' : loop.b.d === 1 ? '#f2994a' : loop.b.d <= 7 ? '#3fb950' : 'inherit'
+                                background: >-
+                                  =loop.b.d <= 0 ? 'rgba(229, 72, 77, 0.18)'
+                                    : loop.b.d === 1 ? 'rgba(242, 153, 74, 0.20)'
+                                    : loop.b.d <= 7 ? 'rgba(63, 185, 80, 0.16)'
+                                    : 'rgba(128, 128, 128, 0.15)'
+                                opacity: "=loop.b.d > 7 ? 0.75 : 1"
+    props:
+      parameters:
+        - name: title
+          label: Titel
+          type: TEXT
+          required: false
+        - name: clockItem
+          label: Uhr-Item
+          type: TEXT
+          context: item
+          required: false
+          description: DateTime-Item, das sich jede Minute aendert (Tageswechsel)
+
+  # -------------------------------------------------------------------
+  # Wetter - aktuell + Tipp + 4-Tage-Vorschau (OpenWeatherMap One Call)
+  # Items: Wetter_Temp, Wetter_Zustand, Wetter_IconId, Wetter_Wind,
+  #        Wetter_Heute_Min/_Max/_Regen/_IconId,
+  #        Wetter_Tag1..4_Max/_IconId/_Regen   (siehe wetter.items)
+  # -------------------------------------------------------------------
+  wetter_karte:
+    component: oh-context
+    config:
+      functions:
+        # "20.6 °C" -> "21°"
+        t: >-
+          =(s) => ((v) => Number.isNaN(v) ? '–' : Math.round(v) + '°')(Number.parseFloat(s))
+        # Zahl aus Item-Zustand (NaN bei NULL/UNDEF)
+        num: >-
+          =(s) => Number.parseFloat(s)
+        # Regenwahrscheinlichkeit in %: akzeptiert "28 %" und "0.28"
+        pct: >-
+          =(s) => ((str) => ((v) => Number.isNaN(v) ? null : Math.round(str.includes('%') ? v : v * 100))(Number.parseFloat(str)))(('' + s))
+        # Wind in km/h: akzeptiert "10.8 km/h" und "3 m/s"
+        wind: >-
+          =(s) => ((str) => ((v) => Number.isNaN(v) ? null : Math.round(str.includes('m/s') ? v * 3.6 : v))(Number.parseFloat(str)))(('' + s))
+        # OpenWeatherMap-Icon-ID (z. B. "04d") -> Emoji
+        icon: >-
+          =(id) => ((k, n) =>
+            k === '01' ? (n ? '🌙' : '☀️')
+            : k === '02' ? (n ? '☁️' : '⛅')
+            : k === '03' ? '🌥️'
+            : k === '04' ? '☁️'
+            : k === '09' ? '🌧️'
+            : k === '10' ? (n ? '🌧️' : '🌦️')
+            : k === '11' ? '⛈️'
+            : k === '13' ? '❄️'
+            : k === '50' ? '🌫️'
+            : '🌡️')(('' + id).slice(0, 2), ('' + id).slice(-1) === 'n')
+        # Tipp des Tages aus Tagesvorhersage + aktuellem Wind
+        hint: >-
+          =(ic, rain, max, min, wind) => ((k) =>
+            k === '11' ? '⛈️ Gewitter möglich – besser nicht zu lange draußen bleiben.'
+            : k === '13' ? '❄️ Schnee! Warm anziehen, Mütze nicht vergessen.'
+            : (k === '09' || k === '10' || rain >= 50) ? '☔ Regenschirm einpacken – Regen ist wahrscheinlich.'
+            : wind >= 40 ? '💨 Sehr windig heute – Jacke gut zumachen.'
+            : min <= 3 ? '🧣 Kalt – Jacke, Mütze und Handschuhe.'
+            : max >= 28 ? '🧴 Heiß heute – Sonnencreme und viel trinken!'
+            : (max >= 20 && (k === '01' || k === '02')) ? '😎 Schönes Wetter – ab nach draußen!'
+            : '🧥 Typisches Wetter – eine Jacke schadet nie.')(('' + ic).slice(0, 2))
+    slots:
+      default:
+        - component: f7-card
+          config:
+            style:
+              margin: 0
+              flex: 1 1 auto
+              box-sizing: border-box
+              border-radius: 16px
+              overflow: hidden
+              border: 1px solid rgba(128, 128, 128, 0.22)
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06)
+              padding: 18px 20px 16px
+          slots:
+            default:
+              # ---------------- Kopf ----------------
+              - component: Label
+                config:
+                  text: "='WETTER HEUTE' + (props.ort ? ' · ' + props.ort.toUpperCase() : '')"
+                  style:
+                    font-size: 12px
+                    font-weight: 600
+                    letter-spacing: 0.08em
+                    opacity: 0.55
+                    margin-bottom: 12px
+
+              # ---------------- Aktuell ----------------
+              - component: div
+                config:
+                  style:
+                    display: flex
+                    align-items: center
+                    gap: 16px
+                slots:
+                  default:
+                    - component: Label
+                      config:
+                        text: =fn.icon(items.Wetter_IconId.state)
+                        style:
+                          font-size: 58px
+                          line-height: 1
+                    - component: div
+                      config:
+                        style:
+                          min-width: 0
+                      slots:
+                        default:
+                          - component: Label
+                            config:
+                              text: >-
+                                =((v) => Number.isNaN(v) ? '–' : Math.round(v) + '°C')(fn.num(items.Wetter_Temp.state))
+                              style:
+                                font-size: 40px
+                                font-weight: 300
+                                letter-spacing: -0.02em
+                                line-height: 1.1
+                          - component: Label
+                            config:
+                              text: >-
+                                =[
+                                  ['NULL', 'UNDEF'].includes(items.Wetter_Zustand.state) ? '' : items.Wetter_Zustand.state.charAt(0).toUpperCase() + items.Wetter_Zustand.state.slice(1),
+                                  fn.t(items.Wetter_Heute_Min.state) + '/' + fn.t(items.Wetter_Heute_Max.state),
+                                  fn.wind(items.Wetter_Wind.state) === null ? '' : 'Wind ' + fn.wind(items.Wetter_Wind.state) + ' km/h',
+                                  ((v) => Number.isNaN(v) ? '' : 'Regen bisher ' + ('' + (Math.round(v * 10) / 10)).replace('.', ',') + ' mm')(Number.parseFloat(items[props.regenItem || 'Regenvolumen_Letzter_Tag'].state)),
+                                  ((v) => Number.isNaN(v) ? '' : 'Regen Vorhersage ' + ('' + (Math.round(v * 10) / 10)).replace('.', ',') + ' mm')(Number.parseFloat(items[props.regenItem || 'Regenvolumen_Naechsten6Stunden'].state))
+                                ].filter(x => x).join(' · ')
+                              style:
+                                font-size: 14px
+                                opacity: 0.7
+                                margin-top: 2px
+
+              # ---------------- Tipp ----------------
+              - component: Label
+                config:
+                  visible: =!Number.isNaN(fn.num(items.Wetter_Heute_Max.state))
+                  text: >-
+                    =fn.hint(items.Wetter_Heute_IconId.state, fn.pct(items.Wetter_Heute_Regen.state),
+                      fn.num(items.Wetter_Heute_Max.state), fn.num(items.Wetter_Heute_Min.state), fn.wind(items.Wetter_Wind.state))
+                  style:
+                    margin-top: 14px
+                    padding: 10px 14px
+                    border-radius: 10px
+                    font-size: 14px
+                    color: "#6ea8fe"
+                    background: rgba(47, 128, 237, 0.15)
+
+              # ---------------- 4-Tage-Vorschau ----------------
+              - component: div
+                config:
+                  visible: =!Number.isNaN(fn.num(items.Wetter_Tag1_Max.state))
+                  style:
+                    display: grid
+                    grid-template-columns: repeat(4, minmax(0, 1fr))
+                    margin-top: 14px
+                    padding-top: 12px
+                    border-top: 1px solid rgba(128, 128, 128, 0.18)
+                    text-align: center
+                slots:
+                  default:
+                    - component: oh-repeater
+                      config:
+                        sourceType: array
+                        for: i
+                        fragment: true
+                        in: =[1, 2, 3, 4]
+                      slots:
+                        default:
+                          - component: div
+                            slots:
+                              default:
+                                - component: Label
+                                  config:
+                                    text: "=['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][dayjs().add(loop.i, 'day').day()]"
+                                    style:
+                                      font-size: 13px
+                                      opacity: 0.6
+                                - component: Label
+                                  config:
+                                    text: =fn.icon(items['Wetter_Tag' + loop.i + '_IconId'].state)
+                                    style:
+                                      font-size: 24px
+                                      margin: 4px 0
+                                - component: Label
+                                  config:
+                                    text: =fn.t(items['Wetter_Tag' + loop.i + '_Max'].state)
+                                    style:
+                                      font-size: 16px
+                                      font-weight: 500
+                                - component: Label
+                                  config:
+                                    text: >-
+                                      =fn.pct(items['Wetter_Tag' + loop.i + '_Regen'].state) === null ? '' : fn.pct(items['Wetter_Tag' + loop.i + '_Regen'].state) + ' %'
+                                    style:
+                                      font-size: 12px
+                                      color: "#6ea8fe"
+                                      margin-top: 2px
+    props:
+      parameters:
+        - name: ort
+          label: Ort
+          type: TEXT
+          required: false
+          description: Wird im Kartenkopf angezeigt, z. B. Musterstadt
+        - name: regenItem
+          label: Regenmengen-Item
+          type: TEXT
+          context: item
+          required: false
+          description: Regenmenge heute in mm (Standard Regenvolumen_Letzter_Tag)
+
+pages:
+  # ------------------------------------------------------------------
+  # TabbedPage
+  # ------------------------------------------------------------------
+  familie_dashboard:
+    component: oh-tabs-page
+    config:
+      label: Familie
+      sidebar: true            # immer in der Seitenleiste der Main UI sichtbar
+    slots:
+      default:
+        - component: oh-tab
+          config:
+            title: Übersicht
+            icon: f7:square_grid_2x2
+            page: page:familie_uebersicht
+        - component: oh-tab
+          config:
+            title: Familie
+            icon: f7:person_3
+            page: page:familie_familie
+        - component: oh-tab
+          config:
+            title: Lisa
+            icon: f7:person_crop_circle
+            page: page:familie_lisa
+        - component: oh-tab
+          config:
+            title: Max
+            icon: f7:person_crop_circle
+            page: page:familie_max
+        - component: oh-tab
+          config:
+            title: Tom
+            icon: f7:person_crop_circle
+            page: page:familie_tom
+        - component: oh-tab
+          config:
+            title: Paul
+            icon: f7:person_crop_circle
+            page: page:familie_paul
+
+  # ------------------------------------------------------------------
+  # Tab 1: Uebersicht
+  #   Zeile 1: Lisa | Max | Familie   (je 33 %)
+  #   Zeile 2: Tom | Paul         (je 50 %)
+  # Wird ein Kalender angebunden: 'prefix' auf das Item-Praefix setzen.
+  # ------------------------------------------------------------------
+  familie_uebersicht:
+    component: oh-layout-page
+    config:
+      label: Übersicht
+    slots:
+      default:
+        # Pflicht-Hierarchie der Layout-Seite: oh-block > oh-grid-row > oh-grid-col.
+        # Erst innerhalb der Spalte duerfen div/Label usw. stehen.
+        - component: oh-block
+          slots:
+            default:
+              - component: oh-grid-row
+                slots:
+                  default:
+                    - component: oh-grid-col
+                      config:
+                        width: "100"
+                      slots:
+                        default:
+                          # oh-grid-col rendert nur EIN Kind -> alles in einen Container
+                          - component: div
+                            slots:
+                              default:
+                                - component: Label
+                                  config:
+                                    text: Termine heute
+                                    style:
+                                      font-size: 21px
+                                      font-weight: 600
+                                      margin: 12px 12px 14px
+                                # Kalenderkarten: 3 oben, 2 unten, 20 px Abstand, 28 px Seitenrand
+                                - component: div
+                                  config:
+                                    style:
+                                      display: grid
+                                      grid-template-columns: repeat(6, minmax(0, 1fr))
+                                      gap: 20px
+                                      padding: 0 12px
+                                  slots:
+                                    default:
+                                      # jede Karte ueberspannt 2 von 6 Spalten (oben) bzw. 3 von 6 (unten)
+                                      - component: div
+                                        config:
+                                          style:
+                                            grid-column: span 2
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:termine_heute_karte
+                                              config:
+                                                title: Lisa
+                                                subtitle: Erwachsene
+                                                color: "#3a9d5d"
+                                                clockItem: Dashboard_Uhr
+                                                prefix: Termine_Lisa
+                                      - component: div
+                                        config:
+                                          style:
+                                            grid-column: span 2
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:termine_heute_karte
+                                              config:
+                                                title: Max
+                                                subtitle: Erwachsener
+                                                color: "#009999"
+                                                clockItem: Dashboard_Uhr
+                                                prefix: "Termine_Max,Termine_MaxArbeit"
+                                      - component: div
+                                        config:
+                                          style:
+                                            grid-column: span 2
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:termine_heute_karte
+                                              config:
+                                                title: Familie
+                                                subtitle: Gemeinsame Termine
+                                                color: "#8a5cc8"
+                                                clockItem: Dashboard_Uhr
+                                                prefix: Termine_Familie
+                                      - component: div
+                                        config:
+                                          style:
+                                            grid-column: span 3
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:termine_heute_karte
+                                              config:
+                                                title: Tom
+                                                subtitle: 3. Klasse
+                                                color: "#2f5ea8"
+                                                clockItem: Dashboard_Uhr
+                                                prefix: Termine_Tom
+                                      - component: div
+                                        config:
+                                          style:
+                                            grid-column: span 3
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:termine_heute_karte
+                                              config:
+                                                title: Paul
+                                                subtitle: 1. Klasse
+                                                color: "#c9a23f"
+                                                clockItem: Dashboard_Uhr
+                                                prefix: Termine_Paul
+                                - component: Label
+                                  config:
+                                    text: Wetter & Haushalt
+                                    style:
+                                      font-size: 21px
+                                      font-weight: 600
+                                      margin: 32px 12px 14px
+                                # Wetter | Muellabfuhr | Haushaltsaufgaben - je ein Drittel, gleich hoch
+                                - component: div
+                                  config:
+                                    style:
+                                      display: grid
+                                      grid-template-columns: repeat(3, minmax(0, 1fr))
+                                      gap: 20px
+                                      align-items: stretch
+                                      padding: 0 12px 20px
+                                  slots:
+                                    default:
+                                      - component: div
+                                        config:
+                                          style:
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:wetter_karte
+                                              config:
+                                                ort: Musterstadt
+                                      - component: div
+                                        config:
+                                          style:
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:muellabfuhr_karte
+                                              config:
+                                                title: Müllabfuhr
+                                                clockItem: Dashboard_Uhr
+                                      - component: div
+                                        config:
+                                          style:
+                                            display: flex
+                                            min-width: 0
+                                        slots:
+                                          default:
+                                            - component: widget:haushaltsaufgaben_karte
+                                              config:
+                                                title: Haushaltsaufgaben
+                                                color: "#6d7a8a"
+                                                listItem: AufgabenManager_Liste
+                                                befehlItem: AufgabenManager_Befehl
+
+  # ------------------------------------------------------------------
+  # Personen-Tabs
+  # ------------------------------------------------------------------
+  familie_familie:
+    component: oh-layout-page
+    config:
+      label: Familie
+    slots:
+      default:
+        - component: oh-block
+          slots:
+            default:
+              - component: oh-grid-row
+                slots:
+                  default:
+                    - component: oh-grid-col
+                      config:
+                        width: "100"
+                      slots:
+                        default:
+                          - component: widget:kalender_woche
+                            config:
+                              prefix: Woche_Familie
+                              slots: 30
+                              color: "#8a5cc8"
+                              startHour: 6
+                              endHour: 22
+                              hourHeight: 36
+                              clockItem: Dashboard_Uhr
+
+  familie_lisa:
+    component: oh-layout-page
+    config:
+      label: Lisa
+    slots:
+      default:
+        - component: oh-block
+          slots:
+            default:
+              - component: oh-grid-row
+                slots:
+                  default:
+                    - component: oh-grid-col
+                      config:
+                        width: "100"
+                      slots:
+                        default:
+                          - component: widget:kalender_woche
+                            config:
+                              prefix: Woche_Lisa
+                              slots: 30
+                              color: "#3a9d5d"
+                              startHour: 6
+                              endHour: 22
+                              hourHeight: 36
+                              clockItem: Dashboard_Uhr
+
+  familie_max:
+    component: oh-layout-page
+    config:
+      label: Max
+    slots:
+      default:
+        - component: oh-block
+          slots:
+            default:
+              - component: oh-grid-row
+                slots:
+                  default:
+                    - component: oh-grid-col
+                      config:
+                        width: "100"
+                      slots:
+                        default:
+                          - component: widget:kalender_woche
+                            config:
+                              clockItem: Dashboard_Uhr
+                              prefix: "Woche_Max,Woche_MaxArbeit"
+                              slots: 30
+                              color: "#009999"
+                              startHour: 6
+                              endHour: 22
+                              hourHeight: 36
+
+  familie_tom:
+    component: oh-layout-page
+    config:
+      label: Tom
+    slots:
+      default:
+        - component: oh-block
+          slots:
+            default:
+              - component: oh-grid-row
+                slots:
+                  default:
+                    - component: oh-grid-col
+                      config:
+                        width: "100"
+                      slots:
+                        default:
+                          - component: widget:kalender_woche
+                            config:
+                              prefix: Woche_Tom
+                              slots: 30
+                              color: "#2f5ea8"
+                              startHour: 6
+                              endHour: 22
+                              hourHeight: 36
+                              clockItem: Dashboard_Uhr
+
+  familie_paul:
+    component: oh-layout-page
+    config:
+      label: Paul
+    slots:
+      default:
+        - component: oh-block
+          slots:
+            default:
+              - component: oh-grid-row
+                slots:
+                  default:
+                    - component: oh-grid-col
+                      config:
+                        width: "100"
+                      slots:
+                        default:
+                          - component: widget:kalender_woche
+                            config:
+                              prefix: Woche_Paul
+                              slots: 30
+                              color: "#c9a23f"
+                              startHour: 6
+                              endHour: 22
+                              hourHeight: 36
+                              clockItem: Dashboard_Uhr

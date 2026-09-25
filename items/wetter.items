@@ -1,0 +1,31 @@
+// =====================================================================
+// Familien-Dashboard - Wetter (OpenWeatherMap One Call)
+// Ablage: $OPENHAB_CONF/items/wetter.items
+// Thing: openweathermap:onecall:api:daheim
+// =====================================================================
+
+// ---- aktuell ----
+Number:Temperature   Wetter_Temp      "Temperatur [%.1f %unit%]"   <temperature> { channel="openweathermap:onecall:api:daheim:current#temperature" }
+String               Wetter_Zustand   "Wetter [%s]"                <sun_clouds>  { channel="openweathermap:onecall:api:daheim:current#condition" }
+String               Wetter_IconId    "Wetter-Icon [%s]"                         { channel="openweathermap:onecall:api:daheim:current#icon-id" }
+Number:Speed         Wetter_Wind      "Wind [%.0f km/h]"           <wind>        { channel="openweathermap:onecall:api:daheim:current#wind-speed", unit="km/h" }
+
+// ---- heute ----
+Number:Temperature   Wetter_Heute_Min    "Heute min [%.0f %unit%]"  <temperature> { channel="openweathermap:onecall:api:daheim:forecastToday#min-temperature" }
+Number:Temperature   Wetter_Heute_Max    "Heute max [%.0f %unit%]"  <temperature> { channel="openweathermap:onecall:api:daheim:forecastToday#max-temperature" }
+Number:Dimensionless Wetter_Heute_Regen  "Heute Regen [%.0f %%]"    <rain>        { channel="openweathermap:onecall:api:daheim:forecastToday#precip-probability", unit="%" }
+String               Wetter_Heute_IconId "Heute Icon [%s]"                        { channel="openweathermap:onecall:api:daheim:forecastToday#icon-id" }
+
+// ---- naechste 4 Tage ----
+Number:Temperature   Wetter_Tag1_Max    "Tag 1 max [%.0f %unit%]"  <temperature> { channel="openweathermap:onecall:api:daheim:forecastTomorrow#max-temperature" }
+Number:Dimensionless Wetter_Tag1_Regen  "Tag 1 Regen [%.0f %%]"    <rain>        { channel="openweathermap:onecall:api:daheim:forecastTomorrow#precip-probability", unit="%" }
+String               Wetter_Tag1_IconId "Tag 1 Icon [%s]"                        { channel="openweathermap:onecall:api:daheim:forecastTomorrow#icon-id" }
+Number:Temperature   Wetter_Tag2_Max    "Tag 2 max [%.0f %unit%]"  <temperature> { channel="openweathermap:onecall:api:daheim:forecastDay2#max-temperature" }
+Number:Dimensionless Wetter_Tag2_Regen  "Tag 2 Regen [%.0f %%]"    <rain>        { channel="openweathermap:onecall:api:daheim:forecastDay2#precip-probability", unit="%" }
+String               Wetter_Tag2_IconId "Tag 2 Icon [%s]"                        { channel="openweathermap:onecall:api:daheim:forecastDay2#icon-id" }
+Number:Temperature   Wetter_Tag3_Max    "Tag 3 max [%.0f %unit%]"  <temperature> { channel="openweathermap:onecall:api:daheim:forecastDay3#max-temperature" }
+Number:Dimensionless Wetter_Tag3_Regen  "Tag 3 Regen [%.0f %%]"    <rain>        { channel="openweathermap:onecall:api:daheim:forecastDay3#precip-probability", unit="%" }
+String               Wetter_Tag3_IconId "Tag 3 Icon [%s]"                        { channel="openweathermap:onecall:api:daheim:forecastDay3#icon-id" }
+Number:Temperature   Wetter_Tag4_Max    "Tag 4 max [%.0f %unit%]"  <temperature> { channel="openweathermap:onecall:api:daheim:forecastDay4#max-temperature" }
+Number:Dimensionless Wetter_Tag4_Regen  "Tag 4 Regen [%.0f %%]"    <rain>        { channel="openweathermap:onecall:api:daheim:forecastDay4#precip-probability", unit="%" }
+String               Wetter_Tag4_IconId "Tag 4 Icon [%s]"                        { channel="openweathermap:onecall:api:daheim:forecastDay4#icon-id" }

@@ -1,0 +1,3455 @@
+version: 1
+
+# =====================================================================
+# Familien-Dashboard - Kalenderdaten (Backend)
+# Ablage: $OPENHAB_CONF/yaml/familien-dashboard-kalender.yaml
+#
+# Die Kalender-Bridges (icalendar:calendar:Kalender_<Name>) existieren bereits.
+# Hier kommen je Kalender Eventfilter als Kinder der Bridge dazu:
+#   Heute : jetzt bis +24 h, 6 Slots  -> Items Termine_<Name>_<n>_Titel/Beginn/Ende
+#   Woche : heute 00:00 bis +7 Tage, 30 Slots -> Items Woche_<Name>_<n>_Titel/Beginn/Ende
+#
+# Kalender:
+#   Lisa      Bridge Kalender_Lisa      Heute + Woche
+#   Max       Bridge Kalender_Max       Heute + Woche
+#   Max/Arbeit Bridge Kalender_MaxArbeit Heute + Woche (im Dashboard mit Max zusammengefasst)
+#   Familie   Bridge Kalender_Familie   Heute + Woche
+#   Tom  Bridge Kalender_Tom  Heute + Woche
+#   Paul    Bridge Kalender_Paul    Heute + Woche
+# =====================================================================
+
+things:
+
+  # ------------------------------- Lisa -------------------------------
+  icalendar:eventfilter:Kalender_Lisa:Heute:
+    bridge: icalendar:calendar:Kalender_Lisa
+    label: Termine heute (Lisa)
+    config:
+      maxEvents: 6             # Anzahl Slots -> muss zu den Items passen
+      refreshTime: 5           # Minuten; Fenster wird bei jedem Refresh neu berechnet
+      datetimeUnit: HOUR
+      datetimeStart: 0         # Fenster beginnt JETZT ...
+      datetimeEnd: 24          # ... und reicht 24 h voraus
+      datetimeRound: false     # NICHT runden, sonst bleibt der Fensterbeginn bei 00:00
+      datetimeMode: ACTIVE     # laufende + kommende Termine, beendete fallen raus
+
+  icalendar:eventfilter:Kalender_Lisa:Woche:
+    bridge: icalendar:calendar:Kalender_Lisa
+    label: Termine diese Woche (Lisa)
+    config:
+      maxEvents: 30            # Anzahl Slots -> muss zu den Woche-Items passen
+      refreshTime: 5
+      datetimeUnit: DAY        # mit datetimeRound: ab heute 00:00 ...
+      datetimeStart: 0
+      datetimeEnd: 7           # ... bis in 7 Tagen 00:00 (heute + 6 Tage)
+      datetimeRound: true
+      datetimeMode: ACTIVE     # auch Termine, die vor heute begonnen haben und noch laufen
+
+  # ------------------------------- Max -------------------------------
+  icalendar:eventfilter:Kalender_Max:Heute:
+    bridge: icalendar:calendar:Kalender_Max
+    label: Termine heute (Max)
+    config:
+      maxEvents: 6             # Anzahl Slots -> muss zu den Items passen
+      refreshTime: 5           # Minuten; Fenster wird bei jedem Refresh neu berechnet
+      datetimeUnit: HOUR
+      datetimeStart: 0         # Fenster beginnt JETZT ...
+      datetimeEnd: 24          # ... und reicht 24 h voraus
+      datetimeRound: false     # NICHT runden, sonst bleibt der Fensterbeginn bei 00:00
+      datetimeMode: ACTIVE     # laufende + kommende Termine, beendete fallen raus
+
+  icalendar:eventfilter:Kalender_Max:Woche:
+    bridge: icalendar:calendar:Kalender_Max
+    label: Termine diese Woche (Max)
+    config:
+      maxEvents: 30            # Anzahl Slots -> muss zu den Woche-Items passen
+      refreshTime: 5
+      datetimeUnit: DAY        # mit datetimeRound: ab heute 00:00 ...
+      datetimeStart: 0
+      datetimeEnd: 7           # ... bis in 7 Tagen 00:00 (heute + 6 Tage)
+      datetimeRound: true
+      datetimeMode: ACTIVE     # auch Termine, die vor heute begonnen haben und noch laufen
+
+  # --------------------------- Max (Arbeit) ---------------------------
+  # Zweiter Kalender von Max; im Dashboard mit Kalender_Max zusammengefasst.
+  icalendar:eventfilter:Kalender_MaxArbeit:Heute:
+    bridge: icalendar:calendar:Kalender_MaxArbeit
+    label: Termine heute (Max Arbeit)
+    config:
+      maxEvents: 6
+      refreshTime: 5
+      datetimeUnit: HOUR
+      datetimeStart: 0
+      datetimeEnd: 24
+      datetimeRound: false
+      datetimeMode: ACTIVE
+
+  icalendar:eventfilter:Kalender_MaxArbeit:Woche:
+    bridge: icalendar:calendar:Kalender_MaxArbeit
+    label: Termine diese Woche (Max Arbeit)
+    config:
+      maxEvents: 30
+      refreshTime: 5
+      datetimeUnit: DAY
+      datetimeStart: 0
+      datetimeEnd: 7
+      datetimeRound: true
+      datetimeMode: ACTIVE
+
+  # ------------------------------- Familie -------------------------------
+  icalendar:eventfilter:Kalender_Familie:Heute:
+    bridge: icalendar:calendar:Kalender_Familie
+    label: Termine heute (Familie)
+    config:
+      maxEvents: 6             # Anzahl Slots -> muss zu den Items passen
+      refreshTime: 5           # Minuten; Fenster wird bei jedem Refresh neu berechnet
+      datetimeUnit: HOUR
+      datetimeStart: 0         # Fenster beginnt JETZT ...
+      datetimeEnd: 24          # ... und reicht 24 h voraus
+      datetimeRound: false     # NICHT runden, sonst bleibt der Fensterbeginn bei 00:00
+      datetimeMode: ACTIVE     # laufende + kommende Termine, beendete fallen raus
+
+  icalendar:eventfilter:Kalender_Familie:Woche:
+    bridge: icalendar:calendar:Kalender_Familie
+    label: Termine diese Woche (Familie)
+    config:
+      maxEvents: 30            # Anzahl Slots -> muss zu den Woche-Items passen
+      refreshTime: 5
+      datetimeUnit: DAY        # mit datetimeRound: ab heute 00:00 ...
+      datetimeStart: 0
+      datetimeEnd: 7           # ... bis in 7 Tagen 00:00 (heute + 6 Tage)
+      datetimeRound: true
+      datetimeMode: ACTIVE     # auch Termine, die vor heute begonnen haben und noch laufen
+
+  # ------------------------------- Tom -------------------------------
+  icalendar:eventfilter:Kalender_Tom:Heute:
+    bridge: icalendar:calendar:Kalender_Tom
+    label: Termine heute (Tom)
+    config:
+      maxEvents: 6             # Anzahl Slots -> muss zu den Items passen
+      refreshTime: 5           # Minuten; Fenster wird bei jedem Refresh neu berechnet
+      datetimeUnit: HOUR
+      datetimeStart: 0         # Fenster beginnt JETZT ...
+      datetimeEnd: 24          # ... und reicht 24 h voraus
+      datetimeRound: false     # NICHT runden, sonst bleibt der Fensterbeginn bei 00:00
+      datetimeMode: ACTIVE     # laufende + kommende Termine, beendete fallen raus
+
+  icalendar:eventfilter:Kalender_Tom:Woche:
+    bridge: icalendar:calendar:Kalender_Tom
+    label: Termine diese Woche (Tom)
+    config:
+      maxEvents: 30            # Anzahl Slots -> muss zu den Woche-Items passen
+      refreshTime: 5
+      datetimeUnit: DAY        # mit datetimeRound: ab heute 00:00 ...
+      datetimeStart: 0
+      datetimeEnd: 7           # ... bis in 7 Tagen 00:00 (heute + 6 Tage)
+      datetimeRound: true
+      datetimeMode: ACTIVE     # auch Termine, die vor heute begonnen haben und noch laufen
+
+  # ------------------------------- Paul -------------------------------
+  icalendar:eventfilter:Kalender_Paul:Heute:
+    bridge: icalendar:calendar:Kalender_Paul
+    label: Termine heute (Paul)
+    config:
+      maxEvents: 6             # Anzahl Slots -> muss zu den Items passen
+      refreshTime: 5           # Minuten; Fenster wird bei jedem Refresh neu berechnet
+      datetimeUnit: HOUR
+      datetimeStart: 0         # Fenster beginnt JETZT ...
+      datetimeEnd: 24          # ... und reicht 24 h voraus
+      datetimeRound: false     # NICHT runden, sonst bleibt der Fensterbeginn bei 00:00
+      datetimeMode: ACTIVE     # laufende + kommende Termine, beendete fallen raus
+
+  icalendar:eventfilter:Kalender_Paul:Woche:
+    bridge: icalendar:calendar:Kalender_Paul
+    label: Termine diese Woche (Paul)
+    config:
+      maxEvents: 30            # Anzahl Slots -> muss zu den Woche-Items passen
+      refreshTime: 5
+      datetimeUnit: DAY        # mit datetimeRound: ab heute 00:00 ...
+      datetimeStart: 0
+      datetimeEnd: 7           # ... bis in 7 Tagen 00:00 (heute + 6 Tage)
+      datetimeRound: true
+      datetimeMode: ACTIVE     # auch Termine, die vor heute begonnen haben und noch laufen
+
+  # ---------------------------------------------------------------------
+  # Uhr fuer das Dashboard: aendert sich jede Minute und stoesst damit die
+  # Neuberechnung der zeitabhaengigen Widget-Ausdruecke an (NTP-Binding).
+  # ---------------------------------------------------------------------
+  ntp:ntp:dashboard:
+    label: Dashboard-Uhr
+    config:
+      hostname: 0.pool.ntp.org
+      refreshInterval: 60      # Sekunden: Item-Update jede Minute
+      refreshNtp: 30           # Minuten: Abgleich mit dem NTP-Server
+      timeZone: Europe/Berlin
+
+items:
+  Dashboard_Uhr:
+    type: DateTime
+    label: Dashboard-Uhr
+    icon: time
+    channel: "ntp:ntp:dashboard:dateTime"
+
+  # ==================== Max Heute: Termine_Max_0..5 ====================
+  Termine_Max_0_Titel:
+    type: String
+    label: Max Heute 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_0#title"
+  Termine_Max_0_Beginn:
+    type: DateTime
+    label: Max Heute 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_0#begin"
+  Termine_Max_0_Ende:
+    type: DateTime
+    label: Max Heute 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_0#end"
+  Termine_Max_1_Titel:
+    type: String
+    label: Max Heute 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_1#title"
+  Termine_Max_1_Beginn:
+    type: DateTime
+    label: Max Heute 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_1#begin"
+  Termine_Max_1_Ende:
+    type: DateTime
+    label: Max Heute 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_1#end"
+  Termine_Max_2_Titel:
+    type: String
+    label: Max Heute 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_2#title"
+  Termine_Max_2_Beginn:
+    type: DateTime
+    label: Max Heute 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_2#begin"
+  Termine_Max_2_Ende:
+    type: DateTime
+    label: Max Heute 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_2#end"
+  Termine_Max_3_Titel:
+    type: String
+    label: Max Heute 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_3#title"
+  Termine_Max_3_Beginn:
+    type: DateTime
+    label: Max Heute 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_3#begin"
+  Termine_Max_3_Ende:
+    type: DateTime
+    label: Max Heute 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_3#end"
+  Termine_Max_4_Titel:
+    type: String
+    label: Max Heute 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_4#title"
+  Termine_Max_4_Beginn:
+    type: DateTime
+    label: Max Heute 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_4#begin"
+  Termine_Max_4_Ende:
+    type: DateTime
+    label: Max Heute 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_4#end"
+  Termine_Max_5_Titel:
+    type: String
+    label: Max Heute 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_5#title"
+  Termine_Max_5_Beginn:
+    type: DateTime
+    label: Max Heute 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_5#begin"
+  Termine_Max_5_Ende:
+    type: DateTime
+    label: Max Heute 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Heute:result_5#end"
+
+  # ==================== Max Woche: Woche_Max_0..29 ====================
+  Woche_Max_0_Titel:
+    type: String
+    label: Max Woche 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_0#title"
+  Woche_Max_0_Beginn:
+    type: DateTime
+    label: Max Woche 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_0#begin"
+  Woche_Max_0_Ende:
+    type: DateTime
+    label: Max Woche 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_0#end"
+  Woche_Max_1_Titel:
+    type: String
+    label: Max Woche 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_1#title"
+  Woche_Max_1_Beginn:
+    type: DateTime
+    label: Max Woche 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_1#begin"
+  Woche_Max_1_Ende:
+    type: DateTime
+    label: Max Woche 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_1#end"
+  Woche_Max_2_Titel:
+    type: String
+    label: Max Woche 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_2#title"
+  Woche_Max_2_Beginn:
+    type: DateTime
+    label: Max Woche 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_2#begin"
+  Woche_Max_2_Ende:
+    type: DateTime
+    label: Max Woche 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_2#end"
+  Woche_Max_3_Titel:
+    type: String
+    label: Max Woche 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_3#title"
+  Woche_Max_3_Beginn:
+    type: DateTime
+    label: Max Woche 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_3#begin"
+  Woche_Max_3_Ende:
+    type: DateTime
+    label: Max Woche 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_3#end"
+  Woche_Max_4_Titel:
+    type: String
+    label: Max Woche 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_4#title"
+  Woche_Max_4_Beginn:
+    type: DateTime
+    label: Max Woche 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_4#begin"
+  Woche_Max_4_Ende:
+    type: DateTime
+    label: Max Woche 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_4#end"
+  Woche_Max_5_Titel:
+    type: String
+    label: Max Woche 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_5#title"
+  Woche_Max_5_Beginn:
+    type: DateTime
+    label: Max Woche 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_5#begin"
+  Woche_Max_5_Ende:
+    type: DateTime
+    label: Max Woche 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_5#end"
+  Woche_Max_6_Titel:
+    type: String
+    label: Max Woche 7 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_6#title"
+  Woche_Max_6_Beginn:
+    type: DateTime
+    label: Max Woche 7 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_6#begin"
+  Woche_Max_6_Ende:
+    type: DateTime
+    label: Max Woche 7 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_6#end"
+  Woche_Max_7_Titel:
+    type: String
+    label: Max Woche 8 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_7#title"
+  Woche_Max_7_Beginn:
+    type: DateTime
+    label: Max Woche 8 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_7#begin"
+  Woche_Max_7_Ende:
+    type: DateTime
+    label: Max Woche 8 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_7#end"
+  Woche_Max_8_Titel:
+    type: String
+    label: Max Woche 9 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_8#title"
+  Woche_Max_8_Beginn:
+    type: DateTime
+    label: Max Woche 9 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_8#begin"
+  Woche_Max_8_Ende:
+    type: DateTime
+    label: Max Woche 9 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_8#end"
+  Woche_Max_9_Titel:
+    type: String
+    label: Max Woche 10 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_9#title"
+  Woche_Max_9_Beginn:
+    type: DateTime
+    label: Max Woche 10 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_9#begin"
+  Woche_Max_9_Ende:
+    type: DateTime
+    label: Max Woche 10 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_9#end"
+  Woche_Max_10_Titel:
+    type: String
+    label: Max Woche 11 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_10#title"
+  Woche_Max_10_Beginn:
+    type: DateTime
+    label: Max Woche 11 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_10#begin"
+  Woche_Max_10_Ende:
+    type: DateTime
+    label: Max Woche 11 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_10#end"
+  Woche_Max_11_Titel:
+    type: String
+    label: Max Woche 12 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_11#title"
+  Woche_Max_11_Beginn:
+    type: DateTime
+    label: Max Woche 12 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_11#begin"
+  Woche_Max_11_Ende:
+    type: DateTime
+    label: Max Woche 12 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_11#end"
+  Woche_Max_12_Titel:
+    type: String
+    label: Max Woche 13 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_12#title"
+  Woche_Max_12_Beginn:
+    type: DateTime
+    label: Max Woche 13 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_12#begin"
+  Woche_Max_12_Ende:
+    type: DateTime
+    label: Max Woche 13 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_12#end"
+  Woche_Max_13_Titel:
+    type: String
+    label: Max Woche 14 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_13#title"
+  Woche_Max_13_Beginn:
+    type: DateTime
+    label: Max Woche 14 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_13#begin"
+  Woche_Max_13_Ende:
+    type: DateTime
+    label: Max Woche 14 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_13#end"
+  Woche_Max_14_Titel:
+    type: String
+    label: Max Woche 15 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_14#title"
+  Woche_Max_14_Beginn:
+    type: DateTime
+    label: Max Woche 15 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_14#begin"
+  Woche_Max_14_Ende:
+    type: DateTime
+    label: Max Woche 15 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_14#end"
+  Woche_Max_15_Titel:
+    type: String
+    label: Max Woche 16 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_15#title"
+  Woche_Max_15_Beginn:
+    type: DateTime
+    label: Max Woche 16 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_15#begin"
+  Woche_Max_15_Ende:
+    type: DateTime
+    label: Max Woche 16 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_15#end"
+  Woche_Max_16_Titel:
+    type: String
+    label: Max Woche 17 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_16#title"
+  Woche_Max_16_Beginn:
+    type: DateTime
+    label: Max Woche 17 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_16#begin"
+  Woche_Max_16_Ende:
+    type: DateTime
+    label: Max Woche 17 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_16#end"
+  Woche_Max_17_Titel:
+    type: String
+    label: Max Woche 18 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_17#title"
+  Woche_Max_17_Beginn:
+    type: DateTime
+    label: Max Woche 18 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_17#begin"
+  Woche_Max_17_Ende:
+    type: DateTime
+    label: Max Woche 18 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_17#end"
+  Woche_Max_18_Titel:
+    type: String
+    label: Max Woche 19 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_18#title"
+  Woche_Max_18_Beginn:
+    type: DateTime
+    label: Max Woche 19 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_18#begin"
+  Woche_Max_18_Ende:
+    type: DateTime
+    label: Max Woche 19 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_18#end"
+  Woche_Max_19_Titel:
+    type: String
+    label: Max Woche 20 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_19#title"
+  Woche_Max_19_Beginn:
+    type: DateTime
+    label: Max Woche 20 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_19#begin"
+  Woche_Max_19_Ende:
+    type: DateTime
+    label: Max Woche 20 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_19#end"
+  Woche_Max_20_Titel:
+    type: String
+    label: Max Woche 21 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_20#title"
+  Woche_Max_20_Beginn:
+    type: DateTime
+    label: Max Woche 21 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_20#begin"
+  Woche_Max_20_Ende:
+    type: DateTime
+    label: Max Woche 21 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_20#end"
+  Woche_Max_21_Titel:
+    type: String
+    label: Max Woche 22 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_21#title"
+  Woche_Max_21_Beginn:
+    type: DateTime
+    label: Max Woche 22 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_21#begin"
+  Woche_Max_21_Ende:
+    type: DateTime
+    label: Max Woche 22 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_21#end"
+  Woche_Max_22_Titel:
+    type: String
+    label: Max Woche 23 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_22#title"
+  Woche_Max_22_Beginn:
+    type: DateTime
+    label: Max Woche 23 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_22#begin"
+  Woche_Max_22_Ende:
+    type: DateTime
+    label: Max Woche 23 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_22#end"
+  Woche_Max_23_Titel:
+    type: String
+    label: Max Woche 24 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_23#title"
+  Woche_Max_23_Beginn:
+    type: DateTime
+    label: Max Woche 24 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_23#begin"
+  Woche_Max_23_Ende:
+    type: DateTime
+    label: Max Woche 24 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_23#end"
+  Woche_Max_24_Titel:
+    type: String
+    label: Max Woche 25 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_24#title"
+  Woche_Max_24_Beginn:
+    type: DateTime
+    label: Max Woche 25 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_24#begin"
+  Woche_Max_24_Ende:
+    type: DateTime
+    label: Max Woche 25 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_24#end"
+  Woche_Max_25_Titel:
+    type: String
+    label: Max Woche 26 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_25#title"
+  Woche_Max_25_Beginn:
+    type: DateTime
+    label: Max Woche 26 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_25#begin"
+  Woche_Max_25_Ende:
+    type: DateTime
+    label: Max Woche 26 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_25#end"
+  Woche_Max_26_Titel:
+    type: String
+    label: Max Woche 27 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_26#title"
+  Woche_Max_26_Beginn:
+    type: DateTime
+    label: Max Woche 27 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_26#begin"
+  Woche_Max_26_Ende:
+    type: DateTime
+    label: Max Woche 27 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_26#end"
+  Woche_Max_27_Titel:
+    type: String
+    label: Max Woche 28 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_27#title"
+  Woche_Max_27_Beginn:
+    type: DateTime
+    label: Max Woche 28 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_27#begin"
+  Woche_Max_27_Ende:
+    type: DateTime
+    label: Max Woche 28 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_27#end"
+  Woche_Max_28_Titel:
+    type: String
+    label: Max Woche 29 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_28#title"
+  Woche_Max_28_Beginn:
+    type: DateTime
+    label: Max Woche 29 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_28#begin"
+  Woche_Max_28_Ende:
+    type: DateTime
+    label: Max Woche 29 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_28#end"
+  Woche_Max_29_Titel:
+    type: String
+    label: Max Woche 30 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_29#title"
+  Woche_Max_29_Beginn:
+    type: DateTime
+    label: Max Woche 30 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_29#begin"
+  Woche_Max_29_Ende:
+    type: DateTime
+    label: Max Woche 30 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Max:Woche:result_29#end"
+
+  # ==================== Familie Heute: Termine_Familie_0..5 ====================
+  Termine_Familie_0_Titel:
+    type: String
+    label: Familie Heute 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_0#title"
+  Termine_Familie_0_Beginn:
+    type: DateTime
+    label: Familie Heute 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_0#begin"
+  Termine_Familie_0_Ende:
+    type: DateTime
+    label: Familie Heute 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_0#end"
+  Termine_Familie_1_Titel:
+    type: String
+    label: Familie Heute 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_1#title"
+  Termine_Familie_1_Beginn:
+    type: DateTime
+    label: Familie Heute 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_1#begin"
+  Termine_Familie_1_Ende:
+    type: DateTime
+    label: Familie Heute 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_1#end"
+  Termine_Familie_2_Titel:
+    type: String
+    label: Familie Heute 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_2#title"
+  Termine_Familie_2_Beginn:
+    type: DateTime
+    label: Familie Heute 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_2#begin"
+  Termine_Familie_2_Ende:
+    type: DateTime
+    label: Familie Heute 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_2#end"
+  Termine_Familie_3_Titel:
+    type: String
+    label: Familie Heute 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_3#title"
+  Termine_Familie_3_Beginn:
+    type: DateTime
+    label: Familie Heute 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_3#begin"
+  Termine_Familie_3_Ende:
+    type: DateTime
+    label: Familie Heute 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_3#end"
+  Termine_Familie_4_Titel:
+    type: String
+    label: Familie Heute 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_4#title"
+  Termine_Familie_4_Beginn:
+    type: DateTime
+    label: Familie Heute 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_4#begin"
+  Termine_Familie_4_Ende:
+    type: DateTime
+    label: Familie Heute 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_4#end"
+  Termine_Familie_5_Titel:
+    type: String
+    label: Familie Heute 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_5#title"
+  Termine_Familie_5_Beginn:
+    type: DateTime
+    label: Familie Heute 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_5#begin"
+  Termine_Familie_5_Ende:
+    type: DateTime
+    label: Familie Heute 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Heute:result_5#end"
+
+  # ==================== Tom Heute: Termine_Tom_0..5 ====================
+  Termine_Tom_0_Titel:
+    type: String
+    label: Tom Heute 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_0#title"
+  Termine_Tom_0_Beginn:
+    type: DateTime
+    label: Tom Heute 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_0#begin"
+  Termine_Tom_0_Ende:
+    type: DateTime
+    label: Tom Heute 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_0#end"
+  Termine_Tom_1_Titel:
+    type: String
+    label: Tom Heute 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_1#title"
+  Termine_Tom_1_Beginn:
+    type: DateTime
+    label: Tom Heute 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_1#begin"
+  Termine_Tom_1_Ende:
+    type: DateTime
+    label: Tom Heute 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_1#end"
+  Termine_Tom_2_Titel:
+    type: String
+    label: Tom Heute 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_2#title"
+  Termine_Tom_2_Beginn:
+    type: DateTime
+    label: Tom Heute 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_2#begin"
+  Termine_Tom_2_Ende:
+    type: DateTime
+    label: Tom Heute 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_2#end"
+  Termine_Tom_3_Titel:
+    type: String
+    label: Tom Heute 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_3#title"
+  Termine_Tom_3_Beginn:
+    type: DateTime
+    label: Tom Heute 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_3#begin"
+  Termine_Tom_3_Ende:
+    type: DateTime
+    label: Tom Heute 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_3#end"
+  Termine_Tom_4_Titel:
+    type: String
+    label: Tom Heute 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_4#title"
+  Termine_Tom_4_Beginn:
+    type: DateTime
+    label: Tom Heute 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_4#begin"
+  Termine_Tom_4_Ende:
+    type: DateTime
+    label: Tom Heute 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_4#end"
+  Termine_Tom_5_Titel:
+    type: String
+    label: Tom Heute 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_5#title"
+  Termine_Tom_5_Beginn:
+    type: DateTime
+    label: Tom Heute 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_5#begin"
+  Termine_Tom_5_Ende:
+    type: DateTime
+    label: Tom Heute 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Heute:result_5#end"
+
+  # ==================== Tom Woche: Woche_Tom_0..29 ====================
+  Woche_Tom_0_Titel:
+    type: String
+    label: Tom Woche 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_0#title"
+  Woche_Tom_0_Beginn:
+    type: DateTime
+    label: Tom Woche 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_0#begin"
+  Woche_Tom_0_Ende:
+    type: DateTime
+    label: Tom Woche 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_0#end"
+  Woche_Tom_1_Titel:
+    type: String
+    label: Tom Woche 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_1#title"
+  Woche_Tom_1_Beginn:
+    type: DateTime
+    label: Tom Woche 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_1#begin"
+  Woche_Tom_1_Ende:
+    type: DateTime
+    label: Tom Woche 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_1#end"
+  Woche_Tom_2_Titel:
+    type: String
+    label: Tom Woche 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_2#title"
+  Woche_Tom_2_Beginn:
+    type: DateTime
+    label: Tom Woche 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_2#begin"
+  Woche_Tom_2_Ende:
+    type: DateTime
+    label: Tom Woche 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_2#end"
+  Woche_Tom_3_Titel:
+    type: String
+    label: Tom Woche 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_3#title"
+  Woche_Tom_3_Beginn:
+    type: DateTime
+    label: Tom Woche 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_3#begin"
+  Woche_Tom_3_Ende:
+    type: DateTime
+    label: Tom Woche 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_3#end"
+  Woche_Tom_4_Titel:
+    type: String
+    label: Tom Woche 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_4#title"
+  Woche_Tom_4_Beginn:
+    type: DateTime
+    label: Tom Woche 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_4#begin"
+  Woche_Tom_4_Ende:
+    type: DateTime
+    label: Tom Woche 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_4#end"
+  Woche_Tom_5_Titel:
+    type: String
+    label: Tom Woche 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_5#title"
+  Woche_Tom_5_Beginn:
+    type: DateTime
+    label: Tom Woche 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_5#begin"
+  Woche_Tom_5_Ende:
+    type: DateTime
+    label: Tom Woche 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_5#end"
+  Woche_Tom_6_Titel:
+    type: String
+    label: Tom Woche 7 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_6#title"
+  Woche_Tom_6_Beginn:
+    type: DateTime
+    label: Tom Woche 7 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_6#begin"
+  Woche_Tom_6_Ende:
+    type: DateTime
+    label: Tom Woche 7 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_6#end"
+  Woche_Tom_7_Titel:
+    type: String
+    label: Tom Woche 8 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_7#title"
+  Woche_Tom_7_Beginn:
+    type: DateTime
+    label: Tom Woche 8 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_7#begin"
+  Woche_Tom_7_Ende:
+    type: DateTime
+    label: Tom Woche 8 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_7#end"
+  Woche_Tom_8_Titel:
+    type: String
+    label: Tom Woche 9 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_8#title"
+  Woche_Tom_8_Beginn:
+    type: DateTime
+    label: Tom Woche 9 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_8#begin"
+  Woche_Tom_8_Ende:
+    type: DateTime
+    label: Tom Woche 9 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_8#end"
+  Woche_Tom_9_Titel:
+    type: String
+    label: Tom Woche 10 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_9#title"
+  Woche_Tom_9_Beginn:
+    type: DateTime
+    label: Tom Woche 10 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_9#begin"
+  Woche_Tom_9_Ende:
+    type: DateTime
+    label: Tom Woche 10 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_9#end"
+  Woche_Tom_10_Titel:
+    type: String
+    label: Tom Woche 11 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_10#title"
+  Woche_Tom_10_Beginn:
+    type: DateTime
+    label: Tom Woche 11 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_10#begin"
+  Woche_Tom_10_Ende:
+    type: DateTime
+    label: Tom Woche 11 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_10#end"
+  Woche_Tom_11_Titel:
+    type: String
+    label: Tom Woche 12 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_11#title"
+  Woche_Tom_11_Beginn:
+    type: DateTime
+    label: Tom Woche 12 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_11#begin"
+  Woche_Tom_11_Ende:
+    type: DateTime
+    label: Tom Woche 12 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_11#end"
+  Woche_Tom_12_Titel:
+    type: String
+    label: Tom Woche 13 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_12#title"
+  Woche_Tom_12_Beginn:
+    type: DateTime
+    label: Tom Woche 13 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_12#begin"
+  Woche_Tom_12_Ende:
+    type: DateTime
+    label: Tom Woche 13 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_12#end"
+  Woche_Tom_13_Titel:
+    type: String
+    label: Tom Woche 14 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_13#title"
+  Woche_Tom_13_Beginn:
+    type: DateTime
+    label: Tom Woche 14 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_13#begin"
+  Woche_Tom_13_Ende:
+    type: DateTime
+    label: Tom Woche 14 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_13#end"
+  Woche_Tom_14_Titel:
+    type: String
+    label: Tom Woche 15 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_14#title"
+  Woche_Tom_14_Beginn:
+    type: DateTime
+    label: Tom Woche 15 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_14#begin"
+  Woche_Tom_14_Ende:
+    type: DateTime
+    label: Tom Woche 15 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_14#end"
+  Woche_Tom_15_Titel:
+    type: String
+    label: Tom Woche 16 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_15#title"
+  Woche_Tom_15_Beginn:
+    type: DateTime
+    label: Tom Woche 16 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_15#begin"
+  Woche_Tom_15_Ende:
+    type: DateTime
+    label: Tom Woche 16 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_15#end"
+  Woche_Tom_16_Titel:
+    type: String
+    label: Tom Woche 17 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_16#title"
+  Woche_Tom_16_Beginn:
+    type: DateTime
+    label: Tom Woche 17 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_16#begin"
+  Woche_Tom_16_Ende:
+    type: DateTime
+    label: Tom Woche 17 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_16#end"
+  Woche_Tom_17_Titel:
+    type: String
+    label: Tom Woche 18 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_17#title"
+  Woche_Tom_17_Beginn:
+    type: DateTime
+    label: Tom Woche 18 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_17#begin"
+  Woche_Tom_17_Ende:
+    type: DateTime
+    label: Tom Woche 18 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_17#end"
+  Woche_Tom_18_Titel:
+    type: String
+    label: Tom Woche 19 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_18#title"
+  Woche_Tom_18_Beginn:
+    type: DateTime
+    label: Tom Woche 19 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_18#begin"
+  Woche_Tom_18_Ende:
+    type: DateTime
+    label: Tom Woche 19 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_18#end"
+  Woche_Tom_19_Titel:
+    type: String
+    label: Tom Woche 20 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_19#title"
+  Woche_Tom_19_Beginn:
+    type: DateTime
+    label: Tom Woche 20 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_19#begin"
+  Woche_Tom_19_Ende:
+    type: DateTime
+    label: Tom Woche 20 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_19#end"
+  Woche_Tom_20_Titel:
+    type: String
+    label: Tom Woche 21 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_20#title"
+  Woche_Tom_20_Beginn:
+    type: DateTime
+    label: Tom Woche 21 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_20#begin"
+  Woche_Tom_20_Ende:
+    type: DateTime
+    label: Tom Woche 21 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_20#end"
+  Woche_Tom_21_Titel:
+    type: String
+    label: Tom Woche 22 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_21#title"
+  Woche_Tom_21_Beginn:
+    type: DateTime
+    label: Tom Woche 22 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_21#begin"
+  Woche_Tom_21_Ende:
+    type: DateTime
+    label: Tom Woche 22 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_21#end"
+  Woche_Tom_22_Titel:
+    type: String
+    label: Tom Woche 23 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_22#title"
+  Woche_Tom_22_Beginn:
+    type: DateTime
+    label: Tom Woche 23 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_22#begin"
+  Woche_Tom_22_Ende:
+    type: DateTime
+    label: Tom Woche 23 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_22#end"
+  Woche_Tom_23_Titel:
+    type: String
+    label: Tom Woche 24 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_23#title"
+  Woche_Tom_23_Beginn:
+    type: DateTime
+    label: Tom Woche 24 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_23#begin"
+  Woche_Tom_23_Ende:
+    type: DateTime
+    label: Tom Woche 24 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_23#end"
+  Woche_Tom_24_Titel:
+    type: String
+    label: Tom Woche 25 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_24#title"
+  Woche_Tom_24_Beginn:
+    type: DateTime
+    label: Tom Woche 25 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_24#begin"
+  Woche_Tom_24_Ende:
+    type: DateTime
+    label: Tom Woche 25 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_24#end"
+  Woche_Tom_25_Titel:
+    type: String
+    label: Tom Woche 26 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_25#title"
+  Woche_Tom_25_Beginn:
+    type: DateTime
+    label: Tom Woche 26 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_25#begin"
+  Woche_Tom_25_Ende:
+    type: DateTime
+    label: Tom Woche 26 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_25#end"
+  Woche_Tom_26_Titel:
+    type: String
+    label: Tom Woche 27 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_26#title"
+  Woche_Tom_26_Beginn:
+    type: DateTime
+    label: Tom Woche 27 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_26#begin"
+  Woche_Tom_26_Ende:
+    type: DateTime
+    label: Tom Woche 27 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_26#end"
+  Woche_Tom_27_Titel:
+    type: String
+    label: Tom Woche 28 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_27#title"
+  Woche_Tom_27_Beginn:
+    type: DateTime
+    label: Tom Woche 28 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_27#begin"
+  Woche_Tom_27_Ende:
+    type: DateTime
+    label: Tom Woche 28 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_27#end"
+  Woche_Tom_28_Titel:
+    type: String
+    label: Tom Woche 29 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_28#title"
+  Woche_Tom_28_Beginn:
+    type: DateTime
+    label: Tom Woche 29 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_28#begin"
+  Woche_Tom_28_Ende:
+    type: DateTime
+    label: Tom Woche 29 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_28#end"
+  Woche_Tom_29_Titel:
+    type: String
+    label: Tom Woche 30 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_29#title"
+  Woche_Tom_29_Beginn:
+    type: DateTime
+    label: Tom Woche 30 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_29#begin"
+  Woche_Tom_29_Ende:
+    type: DateTime
+    label: Tom Woche 30 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Tom:Woche:result_29#end"
+
+  # ==================== Paul Heute: Termine_Paul_0..5 ====================
+  Termine_Paul_0_Titel:
+    type: String
+    label: Paul Heute 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_0#title"
+  Termine_Paul_0_Beginn:
+    type: DateTime
+    label: Paul Heute 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_0#begin"
+  Termine_Paul_0_Ende:
+    type: DateTime
+    label: Paul Heute 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_0#end"
+  Termine_Paul_1_Titel:
+    type: String
+    label: Paul Heute 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_1#title"
+  Termine_Paul_1_Beginn:
+    type: DateTime
+    label: Paul Heute 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_1#begin"
+  Termine_Paul_1_Ende:
+    type: DateTime
+    label: Paul Heute 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_1#end"
+  Termine_Paul_2_Titel:
+    type: String
+    label: Paul Heute 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_2#title"
+  Termine_Paul_2_Beginn:
+    type: DateTime
+    label: Paul Heute 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_2#begin"
+  Termine_Paul_2_Ende:
+    type: DateTime
+    label: Paul Heute 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_2#end"
+  Termine_Paul_3_Titel:
+    type: String
+    label: Paul Heute 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_3#title"
+  Termine_Paul_3_Beginn:
+    type: DateTime
+    label: Paul Heute 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_3#begin"
+  Termine_Paul_3_Ende:
+    type: DateTime
+    label: Paul Heute 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_3#end"
+  Termine_Paul_4_Titel:
+    type: String
+    label: Paul Heute 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_4#title"
+  Termine_Paul_4_Beginn:
+    type: DateTime
+    label: Paul Heute 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_4#begin"
+  Termine_Paul_4_Ende:
+    type: DateTime
+    label: Paul Heute 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_4#end"
+  Termine_Paul_5_Titel:
+    type: String
+    label: Paul Heute 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_5#title"
+  Termine_Paul_5_Beginn:
+    type: DateTime
+    label: Paul Heute 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_5#begin"
+  Termine_Paul_5_Ende:
+    type: DateTime
+    label: Paul Heute 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Heute:result_5#end"
+
+  # ==================== Paul Woche: Woche_Paul_0..29 ====================
+  Woche_Paul_0_Titel:
+    type: String
+    label: Paul Woche 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_0#title"
+  Woche_Paul_0_Beginn:
+    type: DateTime
+    label: Paul Woche 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_0#begin"
+  Woche_Paul_0_Ende:
+    type: DateTime
+    label: Paul Woche 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_0#end"
+  Woche_Paul_1_Titel:
+    type: String
+    label: Paul Woche 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_1#title"
+  Woche_Paul_1_Beginn:
+    type: DateTime
+    label: Paul Woche 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_1#begin"
+  Woche_Paul_1_Ende:
+    type: DateTime
+    label: Paul Woche 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_1#end"
+  Woche_Paul_2_Titel:
+    type: String
+    label: Paul Woche 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_2#title"
+  Woche_Paul_2_Beginn:
+    type: DateTime
+    label: Paul Woche 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_2#begin"
+  Woche_Paul_2_Ende:
+    type: DateTime
+    label: Paul Woche 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_2#end"
+  Woche_Paul_3_Titel:
+    type: String
+    label: Paul Woche 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_3#title"
+  Woche_Paul_3_Beginn:
+    type: DateTime
+    label: Paul Woche 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_3#begin"
+  Woche_Paul_3_Ende:
+    type: DateTime
+    label: Paul Woche 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_3#end"
+  Woche_Paul_4_Titel:
+    type: String
+    label: Paul Woche 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_4#title"
+  Woche_Paul_4_Beginn:
+    type: DateTime
+    label: Paul Woche 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_4#begin"
+  Woche_Paul_4_Ende:
+    type: DateTime
+    label: Paul Woche 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_4#end"
+  Woche_Paul_5_Titel:
+    type: String
+    label: Paul Woche 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_5#title"
+  Woche_Paul_5_Beginn:
+    type: DateTime
+    label: Paul Woche 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_5#begin"
+  Woche_Paul_5_Ende:
+    type: DateTime
+    label: Paul Woche 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_5#end"
+  Woche_Paul_6_Titel:
+    type: String
+    label: Paul Woche 7 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_6#title"
+  Woche_Paul_6_Beginn:
+    type: DateTime
+    label: Paul Woche 7 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_6#begin"
+  Woche_Paul_6_Ende:
+    type: DateTime
+    label: Paul Woche 7 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_6#end"
+  Woche_Paul_7_Titel:
+    type: String
+    label: Paul Woche 8 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_7#title"
+  Woche_Paul_7_Beginn:
+    type: DateTime
+    label: Paul Woche 8 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_7#begin"
+  Woche_Paul_7_Ende:
+    type: DateTime
+    label: Paul Woche 8 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_7#end"
+  Woche_Paul_8_Titel:
+    type: String
+    label: Paul Woche 9 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_8#title"
+  Woche_Paul_8_Beginn:
+    type: DateTime
+    label: Paul Woche 9 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_8#begin"
+  Woche_Paul_8_Ende:
+    type: DateTime
+    label: Paul Woche 9 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_8#end"
+  Woche_Paul_9_Titel:
+    type: String
+    label: Paul Woche 10 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_9#title"
+  Woche_Paul_9_Beginn:
+    type: DateTime
+    label: Paul Woche 10 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_9#begin"
+  Woche_Paul_9_Ende:
+    type: DateTime
+    label: Paul Woche 10 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_9#end"
+  Woche_Paul_10_Titel:
+    type: String
+    label: Paul Woche 11 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_10#title"
+  Woche_Paul_10_Beginn:
+    type: DateTime
+    label: Paul Woche 11 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_10#begin"
+  Woche_Paul_10_Ende:
+    type: DateTime
+    label: Paul Woche 11 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_10#end"
+  Woche_Paul_11_Titel:
+    type: String
+    label: Paul Woche 12 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_11#title"
+  Woche_Paul_11_Beginn:
+    type: DateTime
+    label: Paul Woche 12 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_11#begin"
+  Woche_Paul_11_Ende:
+    type: DateTime
+    label: Paul Woche 12 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_11#end"
+  Woche_Paul_12_Titel:
+    type: String
+    label: Paul Woche 13 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_12#title"
+  Woche_Paul_12_Beginn:
+    type: DateTime
+    label: Paul Woche 13 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_12#begin"
+  Woche_Paul_12_Ende:
+    type: DateTime
+    label: Paul Woche 13 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_12#end"
+  Woche_Paul_13_Titel:
+    type: String
+    label: Paul Woche 14 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_13#title"
+  Woche_Paul_13_Beginn:
+    type: DateTime
+    label: Paul Woche 14 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_13#begin"
+  Woche_Paul_13_Ende:
+    type: DateTime
+    label: Paul Woche 14 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_13#end"
+  Woche_Paul_14_Titel:
+    type: String
+    label: Paul Woche 15 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_14#title"
+  Woche_Paul_14_Beginn:
+    type: DateTime
+    label: Paul Woche 15 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_14#begin"
+  Woche_Paul_14_Ende:
+    type: DateTime
+    label: Paul Woche 15 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_14#end"
+  Woche_Paul_15_Titel:
+    type: String
+    label: Paul Woche 16 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_15#title"
+  Woche_Paul_15_Beginn:
+    type: DateTime
+    label: Paul Woche 16 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_15#begin"
+  Woche_Paul_15_Ende:
+    type: DateTime
+    label: Paul Woche 16 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_15#end"
+  Woche_Paul_16_Titel:
+    type: String
+    label: Paul Woche 17 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_16#title"
+  Woche_Paul_16_Beginn:
+    type: DateTime
+    label: Paul Woche 17 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_16#begin"
+  Woche_Paul_16_Ende:
+    type: DateTime
+    label: Paul Woche 17 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_16#end"
+  Woche_Paul_17_Titel:
+    type: String
+    label: Paul Woche 18 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_17#title"
+  Woche_Paul_17_Beginn:
+    type: DateTime
+    label: Paul Woche 18 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_17#begin"
+  Woche_Paul_17_Ende:
+    type: DateTime
+    label: Paul Woche 18 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_17#end"
+  Woche_Paul_18_Titel:
+    type: String
+    label: Paul Woche 19 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_18#title"
+  Woche_Paul_18_Beginn:
+    type: DateTime
+    label: Paul Woche 19 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_18#begin"
+  Woche_Paul_18_Ende:
+    type: DateTime
+    label: Paul Woche 19 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_18#end"
+  Woche_Paul_19_Titel:
+    type: String
+    label: Paul Woche 20 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_19#title"
+  Woche_Paul_19_Beginn:
+    type: DateTime
+    label: Paul Woche 20 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_19#begin"
+  Woche_Paul_19_Ende:
+    type: DateTime
+    label: Paul Woche 20 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_19#end"
+  Woche_Paul_20_Titel:
+    type: String
+    label: Paul Woche 21 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_20#title"
+  Woche_Paul_20_Beginn:
+    type: DateTime
+    label: Paul Woche 21 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_20#begin"
+  Woche_Paul_20_Ende:
+    type: DateTime
+    label: Paul Woche 21 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_20#end"
+  Woche_Paul_21_Titel:
+    type: String
+    label: Paul Woche 22 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_21#title"
+  Woche_Paul_21_Beginn:
+    type: DateTime
+    label: Paul Woche 22 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_21#begin"
+  Woche_Paul_21_Ende:
+    type: DateTime
+    label: Paul Woche 22 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_21#end"
+  Woche_Paul_22_Titel:
+    type: String
+    label: Paul Woche 23 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_22#title"
+  Woche_Paul_22_Beginn:
+    type: DateTime
+    label: Paul Woche 23 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_22#begin"
+  Woche_Paul_22_Ende:
+    type: DateTime
+    label: Paul Woche 23 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_22#end"
+  Woche_Paul_23_Titel:
+    type: String
+    label: Paul Woche 24 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_23#title"
+  Woche_Paul_23_Beginn:
+    type: DateTime
+    label: Paul Woche 24 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_23#begin"
+  Woche_Paul_23_Ende:
+    type: DateTime
+    label: Paul Woche 24 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_23#end"
+  Woche_Paul_24_Titel:
+    type: String
+    label: Paul Woche 25 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_24#title"
+  Woche_Paul_24_Beginn:
+    type: DateTime
+    label: Paul Woche 25 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_24#begin"
+  Woche_Paul_24_Ende:
+    type: DateTime
+    label: Paul Woche 25 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_24#end"
+  Woche_Paul_25_Titel:
+    type: String
+    label: Paul Woche 26 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_25#title"
+  Woche_Paul_25_Beginn:
+    type: DateTime
+    label: Paul Woche 26 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_25#begin"
+  Woche_Paul_25_Ende:
+    type: DateTime
+    label: Paul Woche 26 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_25#end"
+  Woche_Paul_26_Titel:
+    type: String
+    label: Paul Woche 27 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_26#title"
+  Woche_Paul_26_Beginn:
+    type: DateTime
+    label: Paul Woche 27 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_26#begin"
+  Woche_Paul_26_Ende:
+    type: DateTime
+    label: Paul Woche 27 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_26#end"
+  Woche_Paul_27_Titel:
+    type: String
+    label: Paul Woche 28 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_27#title"
+  Woche_Paul_27_Beginn:
+    type: DateTime
+    label: Paul Woche 28 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_27#begin"
+  Woche_Paul_27_Ende:
+    type: DateTime
+    label: Paul Woche 28 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_27#end"
+  Woche_Paul_28_Titel:
+    type: String
+    label: Paul Woche 29 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_28#title"
+  Woche_Paul_28_Beginn:
+    type: DateTime
+    label: Paul Woche 29 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_28#begin"
+  Woche_Paul_28_Ende:
+    type: DateTime
+    label: Paul Woche 29 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_28#end"
+  Woche_Paul_29_Titel:
+    type: String
+    label: Paul Woche 30 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_29#title"
+  Woche_Paul_29_Beginn:
+    type: DateTime
+    label: Paul Woche 30 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_29#begin"
+  Woche_Paul_29_Ende:
+    type: DateTime
+    label: Paul Woche 30 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Paul:Woche:result_29#end"
+
+  # ==================== Familie Woche: Woche_Familie_0..29 ====================
+  Woche_Familie_0_Titel:
+    type: String
+    label: Familie Woche 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_0#title"
+  Woche_Familie_0_Beginn:
+    type: DateTime
+    label: Familie Woche 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_0#begin"
+  Woche_Familie_0_Ende:
+    type: DateTime
+    label: Familie Woche 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_0#end"
+  Woche_Familie_1_Titel:
+    type: String
+    label: Familie Woche 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_1#title"
+  Woche_Familie_1_Beginn:
+    type: DateTime
+    label: Familie Woche 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_1#begin"
+  Woche_Familie_1_Ende:
+    type: DateTime
+    label: Familie Woche 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_1#end"
+  Woche_Familie_2_Titel:
+    type: String
+    label: Familie Woche 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_2#title"
+  Woche_Familie_2_Beginn:
+    type: DateTime
+    label: Familie Woche 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_2#begin"
+  Woche_Familie_2_Ende:
+    type: DateTime
+    label: Familie Woche 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_2#end"
+  Woche_Familie_3_Titel:
+    type: String
+    label: Familie Woche 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_3#title"
+  Woche_Familie_3_Beginn:
+    type: DateTime
+    label: Familie Woche 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_3#begin"
+  Woche_Familie_3_Ende:
+    type: DateTime
+    label: Familie Woche 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_3#end"
+  Woche_Familie_4_Titel:
+    type: String
+    label: Familie Woche 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_4#title"
+  Woche_Familie_4_Beginn:
+    type: DateTime
+    label: Familie Woche 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_4#begin"
+  Woche_Familie_4_Ende:
+    type: DateTime
+    label: Familie Woche 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_4#end"
+  Woche_Familie_5_Titel:
+    type: String
+    label: Familie Woche 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_5#title"
+  Woche_Familie_5_Beginn:
+    type: DateTime
+    label: Familie Woche 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_5#begin"
+  Woche_Familie_5_Ende:
+    type: DateTime
+    label: Familie Woche 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_5#end"
+  Woche_Familie_6_Titel:
+    type: String
+    label: Familie Woche 7 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_6#title"
+  Woche_Familie_6_Beginn:
+    type: DateTime
+    label: Familie Woche 7 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_6#begin"
+  Woche_Familie_6_Ende:
+    type: DateTime
+    label: Familie Woche 7 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_6#end"
+  Woche_Familie_7_Titel:
+    type: String
+    label: Familie Woche 8 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_7#title"
+  Woche_Familie_7_Beginn:
+    type: DateTime
+    label: Familie Woche 8 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_7#begin"
+  Woche_Familie_7_Ende:
+    type: DateTime
+    label: Familie Woche 8 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_7#end"
+  Woche_Familie_8_Titel:
+    type: String
+    label: Familie Woche 9 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_8#title"
+  Woche_Familie_8_Beginn:
+    type: DateTime
+    label: Familie Woche 9 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_8#begin"
+  Woche_Familie_8_Ende:
+    type: DateTime
+    label: Familie Woche 9 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_8#end"
+  Woche_Familie_9_Titel:
+    type: String
+    label: Familie Woche 10 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_9#title"
+  Woche_Familie_9_Beginn:
+    type: DateTime
+    label: Familie Woche 10 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_9#begin"
+  Woche_Familie_9_Ende:
+    type: DateTime
+    label: Familie Woche 10 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_9#end"
+  Woche_Familie_10_Titel:
+    type: String
+    label: Familie Woche 11 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_10#title"
+  Woche_Familie_10_Beginn:
+    type: DateTime
+    label: Familie Woche 11 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_10#begin"
+  Woche_Familie_10_Ende:
+    type: DateTime
+    label: Familie Woche 11 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_10#end"
+  Woche_Familie_11_Titel:
+    type: String
+    label: Familie Woche 12 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_11#title"
+  Woche_Familie_11_Beginn:
+    type: DateTime
+    label: Familie Woche 12 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_11#begin"
+  Woche_Familie_11_Ende:
+    type: DateTime
+    label: Familie Woche 12 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_11#end"
+  Woche_Familie_12_Titel:
+    type: String
+    label: Familie Woche 13 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_12#title"
+  Woche_Familie_12_Beginn:
+    type: DateTime
+    label: Familie Woche 13 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_12#begin"
+  Woche_Familie_12_Ende:
+    type: DateTime
+    label: Familie Woche 13 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_12#end"
+  Woche_Familie_13_Titel:
+    type: String
+    label: Familie Woche 14 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_13#title"
+  Woche_Familie_13_Beginn:
+    type: DateTime
+    label: Familie Woche 14 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_13#begin"
+  Woche_Familie_13_Ende:
+    type: DateTime
+    label: Familie Woche 14 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_13#end"
+  Woche_Familie_14_Titel:
+    type: String
+    label: Familie Woche 15 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_14#title"
+  Woche_Familie_14_Beginn:
+    type: DateTime
+    label: Familie Woche 15 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_14#begin"
+  Woche_Familie_14_Ende:
+    type: DateTime
+    label: Familie Woche 15 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_14#end"
+  Woche_Familie_15_Titel:
+    type: String
+    label: Familie Woche 16 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_15#title"
+  Woche_Familie_15_Beginn:
+    type: DateTime
+    label: Familie Woche 16 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_15#begin"
+  Woche_Familie_15_Ende:
+    type: DateTime
+    label: Familie Woche 16 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_15#end"
+  Woche_Familie_16_Titel:
+    type: String
+    label: Familie Woche 17 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_16#title"
+  Woche_Familie_16_Beginn:
+    type: DateTime
+    label: Familie Woche 17 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_16#begin"
+  Woche_Familie_16_Ende:
+    type: DateTime
+    label: Familie Woche 17 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_16#end"
+  Woche_Familie_17_Titel:
+    type: String
+    label: Familie Woche 18 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_17#title"
+  Woche_Familie_17_Beginn:
+    type: DateTime
+    label: Familie Woche 18 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_17#begin"
+  Woche_Familie_17_Ende:
+    type: DateTime
+    label: Familie Woche 18 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_17#end"
+  Woche_Familie_18_Titel:
+    type: String
+    label: Familie Woche 19 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_18#title"
+  Woche_Familie_18_Beginn:
+    type: DateTime
+    label: Familie Woche 19 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_18#begin"
+  Woche_Familie_18_Ende:
+    type: DateTime
+    label: Familie Woche 19 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_18#end"
+  Woche_Familie_19_Titel:
+    type: String
+    label: Familie Woche 20 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_19#title"
+  Woche_Familie_19_Beginn:
+    type: DateTime
+    label: Familie Woche 20 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_19#begin"
+  Woche_Familie_19_Ende:
+    type: DateTime
+    label: Familie Woche 20 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_19#end"
+  Woche_Familie_20_Titel:
+    type: String
+    label: Familie Woche 21 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_20#title"
+  Woche_Familie_20_Beginn:
+    type: DateTime
+    label: Familie Woche 21 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_20#begin"
+  Woche_Familie_20_Ende:
+    type: DateTime
+    label: Familie Woche 21 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_20#end"
+  Woche_Familie_21_Titel:
+    type: String
+    label: Familie Woche 22 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_21#title"
+  Woche_Familie_21_Beginn:
+    type: DateTime
+    label: Familie Woche 22 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_21#begin"
+  Woche_Familie_21_Ende:
+    type: DateTime
+    label: Familie Woche 22 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_21#end"
+  Woche_Familie_22_Titel:
+    type: String
+    label: Familie Woche 23 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_22#title"
+  Woche_Familie_22_Beginn:
+    type: DateTime
+    label: Familie Woche 23 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_22#begin"
+  Woche_Familie_22_Ende:
+    type: DateTime
+    label: Familie Woche 23 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_22#end"
+  Woche_Familie_23_Titel:
+    type: String
+    label: Familie Woche 24 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_23#title"
+  Woche_Familie_23_Beginn:
+    type: DateTime
+    label: Familie Woche 24 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_23#begin"
+  Woche_Familie_23_Ende:
+    type: DateTime
+    label: Familie Woche 24 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_23#end"
+  Woche_Familie_24_Titel:
+    type: String
+    label: Familie Woche 25 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_24#title"
+  Woche_Familie_24_Beginn:
+    type: DateTime
+    label: Familie Woche 25 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_24#begin"
+  Woche_Familie_24_Ende:
+    type: DateTime
+    label: Familie Woche 25 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_24#end"
+  Woche_Familie_25_Titel:
+    type: String
+    label: Familie Woche 26 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_25#title"
+  Woche_Familie_25_Beginn:
+    type: DateTime
+    label: Familie Woche 26 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_25#begin"
+  Woche_Familie_25_Ende:
+    type: DateTime
+    label: Familie Woche 26 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_25#end"
+  Woche_Familie_26_Titel:
+    type: String
+    label: Familie Woche 27 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_26#title"
+  Woche_Familie_26_Beginn:
+    type: DateTime
+    label: Familie Woche 27 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_26#begin"
+  Woche_Familie_26_Ende:
+    type: DateTime
+    label: Familie Woche 27 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_26#end"
+  Woche_Familie_27_Titel:
+    type: String
+    label: Familie Woche 28 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_27#title"
+  Woche_Familie_27_Beginn:
+    type: DateTime
+    label: Familie Woche 28 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_27#begin"
+  Woche_Familie_27_Ende:
+    type: DateTime
+    label: Familie Woche 28 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_27#end"
+  Woche_Familie_28_Titel:
+    type: String
+    label: Familie Woche 29 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_28#title"
+  Woche_Familie_28_Beginn:
+    type: DateTime
+    label: Familie Woche 29 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_28#begin"
+  Woche_Familie_28_Ende:
+    type: DateTime
+    label: Familie Woche 29 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_28#end"
+  Woche_Familie_29_Titel:
+    type: String
+    label: Familie Woche 30 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_29#title"
+  Woche_Familie_29_Beginn:
+    type: DateTime
+    label: Familie Woche 30 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_29#begin"
+  Woche_Familie_29_Ende:
+    type: DateTime
+    label: Familie Woche 30 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Familie:Woche:result_29#end"
+
+  # ==================== Lisa Heute: Termine_Lisa_0..5 ====================
+  Termine_Lisa_0_Titel:
+    type: String
+    label: Lisa Heute 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_0#title"
+  Termine_Lisa_0_Beginn:
+    type: DateTime
+    label: Lisa Heute 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_0#begin"
+  Termine_Lisa_0_Ende:
+    type: DateTime
+    label: Lisa Heute 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_0#end"
+  Termine_Lisa_1_Titel:
+    type: String
+    label: Lisa Heute 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_1#title"
+  Termine_Lisa_1_Beginn:
+    type: DateTime
+    label: Lisa Heute 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_1#begin"
+  Termine_Lisa_1_Ende:
+    type: DateTime
+    label: Lisa Heute 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_1#end"
+  Termine_Lisa_2_Titel:
+    type: String
+    label: Lisa Heute 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_2#title"
+  Termine_Lisa_2_Beginn:
+    type: DateTime
+    label: Lisa Heute 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_2#begin"
+  Termine_Lisa_2_Ende:
+    type: DateTime
+    label: Lisa Heute 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_2#end"
+  Termine_Lisa_3_Titel:
+    type: String
+    label: Lisa Heute 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_3#title"
+  Termine_Lisa_3_Beginn:
+    type: DateTime
+    label: Lisa Heute 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_3#begin"
+  Termine_Lisa_3_Ende:
+    type: DateTime
+    label: Lisa Heute 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_3#end"
+  Termine_Lisa_4_Titel:
+    type: String
+    label: Lisa Heute 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_4#title"
+  Termine_Lisa_4_Beginn:
+    type: DateTime
+    label: Lisa Heute 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_4#begin"
+  Termine_Lisa_4_Ende:
+    type: DateTime
+    label: Lisa Heute 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_4#end"
+  Termine_Lisa_5_Titel:
+    type: String
+    label: Lisa Heute 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_5#title"
+  Termine_Lisa_5_Beginn:
+    type: DateTime
+    label: Lisa Heute 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_5#begin"
+  Termine_Lisa_5_Ende:
+    type: DateTime
+    label: Lisa Heute 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Heute:result_5#end"
+
+  # ==================== Lisa Woche: Woche_Lisa_0..29 ====================
+  Woche_Lisa_0_Titel:
+    type: String
+    label: Lisa Woche 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_0#title"
+  Woche_Lisa_0_Beginn:
+    type: DateTime
+    label: Lisa Woche 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_0#begin"
+  Woche_Lisa_0_Ende:
+    type: DateTime
+    label: Lisa Woche 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_0#end"
+  Woche_Lisa_1_Titel:
+    type: String
+    label: Lisa Woche 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_1#title"
+  Woche_Lisa_1_Beginn:
+    type: DateTime
+    label: Lisa Woche 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_1#begin"
+  Woche_Lisa_1_Ende:
+    type: DateTime
+    label: Lisa Woche 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_1#end"
+  Woche_Lisa_2_Titel:
+    type: String
+    label: Lisa Woche 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_2#title"
+  Woche_Lisa_2_Beginn:
+    type: DateTime
+    label: Lisa Woche 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_2#begin"
+  Woche_Lisa_2_Ende:
+    type: DateTime
+    label: Lisa Woche 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_2#end"
+  Woche_Lisa_3_Titel:
+    type: String
+    label: Lisa Woche 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_3#title"
+  Woche_Lisa_3_Beginn:
+    type: DateTime
+    label: Lisa Woche 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_3#begin"
+  Woche_Lisa_3_Ende:
+    type: DateTime
+    label: Lisa Woche 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_3#end"
+  Woche_Lisa_4_Titel:
+    type: String
+    label: Lisa Woche 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_4#title"
+  Woche_Lisa_4_Beginn:
+    type: DateTime
+    label: Lisa Woche 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_4#begin"
+  Woche_Lisa_4_Ende:
+    type: DateTime
+    label: Lisa Woche 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_4#end"
+  Woche_Lisa_5_Titel:
+    type: String
+    label: Lisa Woche 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_5#title"
+  Woche_Lisa_5_Beginn:
+    type: DateTime
+    label: Lisa Woche 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_5#begin"
+  Woche_Lisa_5_Ende:
+    type: DateTime
+    label: Lisa Woche 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_5#end"
+  Woche_Lisa_6_Titel:
+    type: String
+    label: Lisa Woche 7 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_6#title"
+  Woche_Lisa_6_Beginn:
+    type: DateTime
+    label: Lisa Woche 7 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_6#begin"
+  Woche_Lisa_6_Ende:
+    type: DateTime
+    label: Lisa Woche 7 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_6#end"
+  Woche_Lisa_7_Titel:
+    type: String
+    label: Lisa Woche 8 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_7#title"
+  Woche_Lisa_7_Beginn:
+    type: DateTime
+    label: Lisa Woche 8 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_7#begin"
+  Woche_Lisa_7_Ende:
+    type: DateTime
+    label: Lisa Woche 8 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_7#end"
+  Woche_Lisa_8_Titel:
+    type: String
+    label: Lisa Woche 9 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_8#title"
+  Woche_Lisa_8_Beginn:
+    type: DateTime
+    label: Lisa Woche 9 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_8#begin"
+  Woche_Lisa_8_Ende:
+    type: DateTime
+    label: Lisa Woche 9 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_8#end"
+  Woche_Lisa_9_Titel:
+    type: String
+    label: Lisa Woche 10 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_9#title"
+  Woche_Lisa_9_Beginn:
+    type: DateTime
+    label: Lisa Woche 10 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_9#begin"
+  Woche_Lisa_9_Ende:
+    type: DateTime
+    label: Lisa Woche 10 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_9#end"
+  Woche_Lisa_10_Titel:
+    type: String
+    label: Lisa Woche 11 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_10#title"
+  Woche_Lisa_10_Beginn:
+    type: DateTime
+    label: Lisa Woche 11 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_10#begin"
+  Woche_Lisa_10_Ende:
+    type: DateTime
+    label: Lisa Woche 11 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_10#end"
+  Woche_Lisa_11_Titel:
+    type: String
+    label: Lisa Woche 12 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_11#title"
+  Woche_Lisa_11_Beginn:
+    type: DateTime
+    label: Lisa Woche 12 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_11#begin"
+  Woche_Lisa_11_Ende:
+    type: DateTime
+    label: Lisa Woche 12 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_11#end"
+  Woche_Lisa_12_Titel:
+    type: String
+    label: Lisa Woche 13 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_12#title"
+  Woche_Lisa_12_Beginn:
+    type: DateTime
+    label: Lisa Woche 13 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_12#begin"
+  Woche_Lisa_12_Ende:
+    type: DateTime
+    label: Lisa Woche 13 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_12#end"
+  Woche_Lisa_13_Titel:
+    type: String
+    label: Lisa Woche 14 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_13#title"
+  Woche_Lisa_13_Beginn:
+    type: DateTime
+    label: Lisa Woche 14 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_13#begin"
+  Woche_Lisa_13_Ende:
+    type: DateTime
+    label: Lisa Woche 14 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_13#end"
+  Woche_Lisa_14_Titel:
+    type: String
+    label: Lisa Woche 15 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_14#title"
+  Woche_Lisa_14_Beginn:
+    type: DateTime
+    label: Lisa Woche 15 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_14#begin"
+  Woche_Lisa_14_Ende:
+    type: DateTime
+    label: Lisa Woche 15 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_14#end"
+  Woche_Lisa_15_Titel:
+    type: String
+    label: Lisa Woche 16 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_15#title"
+  Woche_Lisa_15_Beginn:
+    type: DateTime
+    label: Lisa Woche 16 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_15#begin"
+  Woche_Lisa_15_Ende:
+    type: DateTime
+    label: Lisa Woche 16 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_15#end"
+  Woche_Lisa_16_Titel:
+    type: String
+    label: Lisa Woche 17 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_16#title"
+  Woche_Lisa_16_Beginn:
+    type: DateTime
+    label: Lisa Woche 17 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_16#begin"
+  Woche_Lisa_16_Ende:
+    type: DateTime
+    label: Lisa Woche 17 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_16#end"
+  Woche_Lisa_17_Titel:
+    type: String
+    label: Lisa Woche 18 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_17#title"
+  Woche_Lisa_17_Beginn:
+    type: DateTime
+    label: Lisa Woche 18 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_17#begin"
+  Woche_Lisa_17_Ende:
+    type: DateTime
+    label: Lisa Woche 18 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_17#end"
+  Woche_Lisa_18_Titel:
+    type: String
+    label: Lisa Woche 19 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_18#title"
+  Woche_Lisa_18_Beginn:
+    type: DateTime
+    label: Lisa Woche 19 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_18#begin"
+  Woche_Lisa_18_Ende:
+    type: DateTime
+    label: Lisa Woche 19 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_18#end"
+  Woche_Lisa_19_Titel:
+    type: String
+    label: Lisa Woche 20 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_19#title"
+  Woche_Lisa_19_Beginn:
+    type: DateTime
+    label: Lisa Woche 20 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_19#begin"
+  Woche_Lisa_19_Ende:
+    type: DateTime
+    label: Lisa Woche 20 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_19#end"
+  Woche_Lisa_20_Titel:
+    type: String
+    label: Lisa Woche 21 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_20#title"
+  Woche_Lisa_20_Beginn:
+    type: DateTime
+    label: Lisa Woche 21 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_20#begin"
+  Woche_Lisa_20_Ende:
+    type: DateTime
+    label: Lisa Woche 21 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_20#end"
+  Woche_Lisa_21_Titel:
+    type: String
+    label: Lisa Woche 22 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_21#title"
+  Woche_Lisa_21_Beginn:
+    type: DateTime
+    label: Lisa Woche 22 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_21#begin"
+  Woche_Lisa_21_Ende:
+    type: DateTime
+    label: Lisa Woche 22 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_21#end"
+  Woche_Lisa_22_Titel:
+    type: String
+    label: Lisa Woche 23 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_22#title"
+  Woche_Lisa_22_Beginn:
+    type: DateTime
+    label: Lisa Woche 23 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_22#begin"
+  Woche_Lisa_22_Ende:
+    type: DateTime
+    label: Lisa Woche 23 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_22#end"
+  Woche_Lisa_23_Titel:
+    type: String
+    label: Lisa Woche 24 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_23#title"
+  Woche_Lisa_23_Beginn:
+    type: DateTime
+    label: Lisa Woche 24 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_23#begin"
+  Woche_Lisa_23_Ende:
+    type: DateTime
+    label: Lisa Woche 24 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_23#end"
+  Woche_Lisa_24_Titel:
+    type: String
+    label: Lisa Woche 25 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_24#title"
+  Woche_Lisa_24_Beginn:
+    type: DateTime
+    label: Lisa Woche 25 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_24#begin"
+  Woche_Lisa_24_Ende:
+    type: DateTime
+    label: Lisa Woche 25 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_24#end"
+  Woche_Lisa_25_Titel:
+    type: String
+    label: Lisa Woche 26 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_25#title"
+  Woche_Lisa_25_Beginn:
+    type: DateTime
+    label: Lisa Woche 26 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_25#begin"
+  Woche_Lisa_25_Ende:
+    type: DateTime
+    label: Lisa Woche 26 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_25#end"
+  Woche_Lisa_26_Titel:
+    type: String
+    label: Lisa Woche 27 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_26#title"
+  Woche_Lisa_26_Beginn:
+    type: DateTime
+    label: Lisa Woche 27 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_26#begin"
+  Woche_Lisa_26_Ende:
+    type: DateTime
+    label: Lisa Woche 27 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_26#end"
+  Woche_Lisa_27_Titel:
+    type: String
+    label: Lisa Woche 28 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_27#title"
+  Woche_Lisa_27_Beginn:
+    type: DateTime
+    label: Lisa Woche 28 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_27#begin"
+  Woche_Lisa_27_Ende:
+    type: DateTime
+    label: Lisa Woche 28 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_27#end"
+  Woche_Lisa_28_Titel:
+    type: String
+    label: Lisa Woche 29 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_28#title"
+  Woche_Lisa_28_Beginn:
+    type: DateTime
+    label: Lisa Woche 29 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_28#begin"
+  Woche_Lisa_28_Ende:
+    type: DateTime
+    label: Lisa Woche 29 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_28#end"
+  Woche_Lisa_29_Titel:
+    type: String
+    label: Lisa Woche 30 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_29#title"
+  Woche_Lisa_29_Beginn:
+    type: DateTime
+    label: Lisa Woche 30 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_29#begin"
+  Woche_Lisa_29_Ende:
+    type: DateTime
+    label: Lisa Woche 30 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_Lisa:Woche:result_29#end"
+
+  # ==================== Max Arbeit Heute: Termine_MaxArbeit_0..5 ====================
+  Termine_MaxArbeit_0_Titel:
+    type: String
+    label: Max Arbeit Heute 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_0#title"
+  Termine_MaxArbeit_0_Beginn:
+    type: DateTime
+    label: Max Arbeit Heute 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_0#begin"
+  Termine_MaxArbeit_0_Ende:
+    type: DateTime
+    label: Max Arbeit Heute 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_0#end"
+  Termine_MaxArbeit_1_Titel:
+    type: String
+    label: Max Arbeit Heute 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_1#title"
+  Termine_MaxArbeit_1_Beginn:
+    type: DateTime
+    label: Max Arbeit Heute 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_1#begin"
+  Termine_MaxArbeit_1_Ende:
+    type: DateTime
+    label: Max Arbeit Heute 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_1#end"
+  Termine_MaxArbeit_2_Titel:
+    type: String
+    label: Max Arbeit Heute 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_2#title"
+  Termine_MaxArbeit_2_Beginn:
+    type: DateTime
+    label: Max Arbeit Heute 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_2#begin"
+  Termine_MaxArbeit_2_Ende:
+    type: DateTime
+    label: Max Arbeit Heute 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_2#end"
+  Termine_MaxArbeit_3_Titel:
+    type: String
+    label: Max Arbeit Heute 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_3#title"
+  Termine_MaxArbeit_3_Beginn:
+    type: DateTime
+    label: Max Arbeit Heute 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_3#begin"
+  Termine_MaxArbeit_3_Ende:
+    type: DateTime
+    label: Max Arbeit Heute 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_3#end"
+  Termine_MaxArbeit_4_Titel:
+    type: String
+    label: Max Arbeit Heute 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_4#title"
+  Termine_MaxArbeit_4_Beginn:
+    type: DateTime
+    label: Max Arbeit Heute 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_4#begin"
+  Termine_MaxArbeit_4_Ende:
+    type: DateTime
+    label: Max Arbeit Heute 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_4#end"
+  Termine_MaxArbeit_5_Titel:
+    type: String
+    label: Max Arbeit Heute 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_5#title"
+  Termine_MaxArbeit_5_Beginn:
+    type: DateTime
+    label: Max Arbeit Heute 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_5#begin"
+  Termine_MaxArbeit_5_Ende:
+    type: DateTime
+    label: Max Arbeit Heute 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Heute:result_5#end"
+
+  # ==================== Max Arbeit Woche: Woche_MaxArbeit_0..29 ====================
+  Woche_MaxArbeit_0_Titel:
+    type: String
+    label: Max Arbeit Woche 1 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_0#title"
+  Woche_MaxArbeit_0_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 1 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_0#begin"
+  Woche_MaxArbeit_0_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 1 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_0#end"
+  Woche_MaxArbeit_1_Titel:
+    type: String
+    label: Max Arbeit Woche 2 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_1#title"
+  Woche_MaxArbeit_1_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 2 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_1#begin"
+  Woche_MaxArbeit_1_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 2 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_1#end"
+  Woche_MaxArbeit_2_Titel:
+    type: String
+    label: Max Arbeit Woche 3 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_2#title"
+  Woche_MaxArbeit_2_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 3 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_2#begin"
+  Woche_MaxArbeit_2_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 3 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_2#end"
+  Woche_MaxArbeit_3_Titel:
+    type: String
+    label: Max Arbeit Woche 4 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_3#title"
+  Woche_MaxArbeit_3_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 4 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_3#begin"
+  Woche_MaxArbeit_3_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 4 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_3#end"
+  Woche_MaxArbeit_4_Titel:
+    type: String
+    label: Max Arbeit Woche 5 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_4#title"
+  Woche_MaxArbeit_4_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 5 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_4#begin"
+  Woche_MaxArbeit_4_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 5 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_4#end"
+  Woche_MaxArbeit_5_Titel:
+    type: String
+    label: Max Arbeit Woche 6 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_5#title"
+  Woche_MaxArbeit_5_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 6 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_5#begin"
+  Woche_MaxArbeit_5_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 6 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_5#end"
+  Woche_MaxArbeit_6_Titel:
+    type: String
+    label: Max Arbeit Woche 7 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_6#title"
+  Woche_MaxArbeit_6_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 7 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_6#begin"
+  Woche_MaxArbeit_6_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 7 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_6#end"
+  Woche_MaxArbeit_7_Titel:
+    type: String
+    label: Max Arbeit Woche 8 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_7#title"
+  Woche_MaxArbeit_7_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 8 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_7#begin"
+  Woche_MaxArbeit_7_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 8 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_7#end"
+  Woche_MaxArbeit_8_Titel:
+    type: String
+    label: Max Arbeit Woche 9 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_8#title"
+  Woche_MaxArbeit_8_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 9 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_8#begin"
+  Woche_MaxArbeit_8_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 9 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_8#end"
+  Woche_MaxArbeit_9_Titel:
+    type: String
+    label: Max Arbeit Woche 10 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_9#title"
+  Woche_MaxArbeit_9_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 10 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_9#begin"
+  Woche_MaxArbeit_9_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 10 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_9#end"
+  Woche_MaxArbeit_10_Titel:
+    type: String
+    label: Max Arbeit Woche 11 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_10#title"
+  Woche_MaxArbeit_10_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 11 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_10#begin"
+  Woche_MaxArbeit_10_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 11 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_10#end"
+  Woche_MaxArbeit_11_Titel:
+    type: String
+    label: Max Arbeit Woche 12 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_11#title"
+  Woche_MaxArbeit_11_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 12 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_11#begin"
+  Woche_MaxArbeit_11_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 12 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_11#end"
+  Woche_MaxArbeit_12_Titel:
+    type: String
+    label: Max Arbeit Woche 13 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_12#title"
+  Woche_MaxArbeit_12_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 13 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_12#begin"
+  Woche_MaxArbeit_12_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 13 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_12#end"
+  Woche_MaxArbeit_13_Titel:
+    type: String
+    label: Max Arbeit Woche 14 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_13#title"
+  Woche_MaxArbeit_13_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 14 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_13#begin"
+  Woche_MaxArbeit_13_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 14 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_13#end"
+  Woche_MaxArbeit_14_Titel:
+    type: String
+    label: Max Arbeit Woche 15 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_14#title"
+  Woche_MaxArbeit_14_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 15 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_14#begin"
+  Woche_MaxArbeit_14_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 15 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_14#end"
+  Woche_MaxArbeit_15_Titel:
+    type: String
+    label: Max Arbeit Woche 16 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_15#title"
+  Woche_MaxArbeit_15_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 16 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_15#begin"
+  Woche_MaxArbeit_15_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 16 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_15#end"
+  Woche_MaxArbeit_16_Titel:
+    type: String
+    label: Max Arbeit Woche 17 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_16#title"
+  Woche_MaxArbeit_16_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 17 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_16#begin"
+  Woche_MaxArbeit_16_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 17 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_16#end"
+  Woche_MaxArbeit_17_Titel:
+    type: String
+    label: Max Arbeit Woche 18 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_17#title"
+  Woche_MaxArbeit_17_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 18 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_17#begin"
+  Woche_MaxArbeit_17_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 18 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_17#end"
+  Woche_MaxArbeit_18_Titel:
+    type: String
+    label: Max Arbeit Woche 19 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_18#title"
+  Woche_MaxArbeit_18_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 19 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_18#begin"
+  Woche_MaxArbeit_18_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 19 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_18#end"
+  Woche_MaxArbeit_19_Titel:
+    type: String
+    label: Max Arbeit Woche 20 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_19#title"
+  Woche_MaxArbeit_19_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 20 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_19#begin"
+  Woche_MaxArbeit_19_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 20 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_19#end"
+  Woche_MaxArbeit_20_Titel:
+    type: String
+    label: Max Arbeit Woche 21 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_20#title"
+  Woche_MaxArbeit_20_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 21 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_20#begin"
+  Woche_MaxArbeit_20_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 21 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_20#end"
+  Woche_MaxArbeit_21_Titel:
+    type: String
+    label: Max Arbeit Woche 22 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_21#title"
+  Woche_MaxArbeit_21_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 22 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_21#begin"
+  Woche_MaxArbeit_21_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 22 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_21#end"
+  Woche_MaxArbeit_22_Titel:
+    type: String
+    label: Max Arbeit Woche 23 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_22#title"
+  Woche_MaxArbeit_22_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 23 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_22#begin"
+  Woche_MaxArbeit_22_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 23 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_22#end"
+  Woche_MaxArbeit_23_Titel:
+    type: String
+    label: Max Arbeit Woche 24 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_23#title"
+  Woche_MaxArbeit_23_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 24 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_23#begin"
+  Woche_MaxArbeit_23_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 24 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_23#end"
+  Woche_MaxArbeit_24_Titel:
+    type: String
+    label: Max Arbeit Woche 25 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_24#title"
+  Woche_MaxArbeit_24_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 25 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_24#begin"
+  Woche_MaxArbeit_24_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 25 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_24#end"
+  Woche_MaxArbeit_25_Titel:
+    type: String
+    label: Max Arbeit Woche 26 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_25#title"
+  Woche_MaxArbeit_25_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 26 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_25#begin"
+  Woche_MaxArbeit_25_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 26 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_25#end"
+  Woche_MaxArbeit_26_Titel:
+    type: String
+    label: Max Arbeit Woche 27 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_26#title"
+  Woche_MaxArbeit_26_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 27 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_26#begin"
+  Woche_MaxArbeit_26_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 27 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_26#end"
+  Woche_MaxArbeit_27_Titel:
+    type: String
+    label: Max Arbeit Woche 28 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_27#title"
+  Woche_MaxArbeit_27_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 28 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_27#begin"
+  Woche_MaxArbeit_27_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 28 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_27#end"
+  Woche_MaxArbeit_28_Titel:
+    type: String
+    label: Max Arbeit Woche 29 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_28#title"
+  Woche_MaxArbeit_28_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 29 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_28#begin"
+  Woche_MaxArbeit_28_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 29 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_28#end"
+  Woche_MaxArbeit_29_Titel:
+    type: String
+    label: Max Arbeit Woche 30 Titel
+    icon: calendar
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_29#title"
+  Woche_MaxArbeit_29_Beginn:
+    type: DateTime
+    label: Max Arbeit Woche 30 Beginn
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_29#begin"
+  Woche_MaxArbeit_29_Ende:
+    type: DateTime
+    label: Max Arbeit Woche 30 Ende
+    icon: time
+    channel: "icalendar:eventfilter:Kalender_MaxArbeit:Woche:result_29#end"

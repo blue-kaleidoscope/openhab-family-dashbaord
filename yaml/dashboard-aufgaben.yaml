@@ -1,0 +1,15 @@
+version: 1
+
+# =====================================================================
+# Familien-Dashboard - Haushaltsaufgaben (Backend)
+# Ablage: $OPENHAB_CONF/yaml/familien-dashboard-aufgaben.yaml
+#
+# AufgabenManager_Befehl existiert bereits (bitte nicht doppelt anlegen).
+# Neu ist nur die Liste fuer das Widget:
+# =====================================================================
+
+items:
+  AufgabenManager_Liste:
+    type: String
+    label: Aufgabenliste (JSON fuer Dashboard)
+    icon: text
