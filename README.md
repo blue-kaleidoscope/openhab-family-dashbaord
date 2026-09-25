@@ -17,6 +17,7 @@ Anonymized example. People here are named Lisa, Max, Tom, and Paul.
 | `dashboard-kalender.yaml` | `$OPENHAB_CONF/yaml/` | Event filters + calendar items, NTP clock |
 | `dashboard-aufgaben.yaml` | `$OPENHAB_CONF/yaml/` | Item for the task list |
 | `wetter.items` | `$OPENHAB_CONF/items/` | Items for OpenWeatherMap (One Call) |
+| `wetter.things`| `$OPENHAB_CONF/things/` | Things for OpeenWeatherMap (One Call) |
 | `aufgaben.rb` | `$OPENHAB_CONF/automation/ruby/` | Rules for task management (JRuby) |
 
 ## Prerequisites
